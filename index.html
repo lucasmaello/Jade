@@ -1,0 +1,1993 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#071e16" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>JADE OS</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <style>
+    :root {
+      --bg-deep: #071e16;
+      --bg-mid: #0d2e22;
+      --bg-sage: #184a38;
+      --glass-card: rgba(7, 26, 19, 0.62);
+      --glass-card-elevated: rgba(11, 38, 28, 0.78);
+      --glass-pill: rgba(255, 255, 255, 0.06);
+      --glass-border: rgba(167, 243, 208, 0.14);
+      --glass-border-strong: rgba(110, 231, 183, 0.32);
+      --emerald-accent: #34d399;
+      --emerald-soft: #6ee7b7;
+      --emerald-glow: rgba(52, 211, 153, 0.22);
+      --amber-soft: #fbbf24;
+      --rose-soft: #fb7185;
+      --text-primary: #f0fdf4;
+      --text-secondary: #a7c4b5;
+      --text-muted: #6b8f7e;
+      --font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      --font-num: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      background-color: var(--bg-deep);
+      color: var(--text-primary);
+      font-family: var(--font-ui);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Fundo Xiaomi 14 Verde Jade */
+    .jade-wallpaper {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: linear-gradient(165deg, #051711 0%, #0b2b20 42%, #154534 78%, #285e4b 100%);
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .jade-wallpaper svg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.9;
+    }
+
+    .num {
+      font-family: var(--font-num);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+
+    /* Shell Principal */
+    .app-shell {
+      position: relative;
+      z-index: 1;
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding: calc(env(safe-area-inset-top, 14px) + 12px) 16px 104px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Header Minimalista (Apenas 2 ícones à direita) */
+    .top-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 2px;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald-accent);
+      box-shadow: 0 0 12px var(--emerald-accent);
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+      font-weight: 400;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mandala-pill-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(16, 56, 42, 0.72);
+      border: 1px solid var(--glass-border-strong);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      color: var(--emerald-soft);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(52, 211, 153, 0.16);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .mandala-pill-btn:active {
+      transform: scale(0.95);
+    }
+
+    .icon-circle-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: transform 0.18s ease;
+    }
+
+    .icon-circle-btn:active {
+      transform: scale(0.94);
+    }
+
+    /* Cartões Glassmorphism HyperOS */
+    .glass-card {
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 22px;
+      padding: 16px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+    }
+
+    .micro-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--text-secondary);
+    }
+
+    /* Segment Switcher */
+    .segmented-control {
+      display: flex;
+      background: rgba(5, 20, 15, 0.65);
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      padding: 3px;
+      gap: 3px;
+    }
+
+    .seg-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .seg-btn.active {
+      background: rgba(52, 211, 153, 0.18);
+      color: var(--emerald-soft);
+      box-shadow: inset 0 0 0 1px rgba(110, 231, 183, 0.28);
+    }
+
+    /* Views */
+    .tab-view {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+      animation: fadeSlide 0.22s ease;
+    }
+
+    .tab-view.active {
+      display: flex;
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Métricas Principais */
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .metric-val {
+      font-size: 24px;
+      font-weight: 400;
+      color: var(--text-primary);
+      margin-top: 6px;
+    }
+
+    .metric-val.accent { color: var(--emerald-soft); }
+    .metric-val.warn { color: var(--amber-soft); }
+
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #6ee7b7);
+      border-radius: 999px;
+      transition: width 0.35s ease;
+    }
+
+    /* Humor / Energia 1-5 */
+    .mood-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .mood-btn {
+      flex: 1;
+      padding: 9px 0;
+      border-radius: 14px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-secondary);
+      font-family: var(--font-num);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .mood-btn.selected {
+      background: rgba(52, 211, 153, 0.2);
+      border-color: var(--emerald-accent);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* Lista de Itens & Checkboxes */
+    .list-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 11px 12px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+    }
+
+    .check-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .jade-checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 7px;
+      border: 1.5px solid var(--emerald-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.18s ease;
+    }
+
+    .check-row.done .jade-checkbox {
+      background: var(--emerald-accent);
+      border-color: var(--emerald-accent);
+    }
+
+    .check-row.done .item-title {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .item-title {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pill-badge {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(52, 211, 153, 0.12);
+      color: var(--emerald-soft);
+      border: 1px solid rgba(52, 211, 153, 0.2);
+      white-space: nowrap;
+    }
+
+    /* Botões */
+    .btn-jade {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 16px;
+      border: 1px solid var(--glass-border-strong);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.26), rgba(5, 150, 105, 0.16));
+      color: var(--emerald-soft);
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.16s ease;
+    }
+
+    .btn-jade:active { transform: scale(0.98); }
+
+    .btn-ghost {
+      padding: 9px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    /* Carrossel de Cartões Nubank, Bradesco Prime & Itaú */
+    .cards-carousel {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+    .cards-carousel::-webkit-scrollbar { display: none; }
+
+    .bank-card {
+      min-width: 268px;
+      scroll-snap-align: start;
+      border-radius: 20px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 152px;
+    }
+
+    .bank-card.nubank {
+      background: linear-gradient(135deg, rgba(64, 18, 104, 0.88) 0%, rgba(28, 12, 54, 0.92) 60%, rgba(12, 34, 28, 0.92) 100%);
+      box-shadow: 0 10px 26px rgba(88, 28, 135, 0.28);
+    }
+
+    .bank-card.bradesco {
+      background: linear-gradient(135deg, rgba(115, 16, 36, 0.88) 0%, rgba(56, 12, 24, 0.92) 60%, rgba(12, 34, 28, 0.92) 100%);
+      box-shadow: 0 10px 26px rgba(159, 18, 57, 0.26);
+    }
+
+    .bank-card.itau {
+      background: linear-gradient(135deg, rgba(168, 72, 12, 0.9) 0%, rgba(78, 34, 10, 0.92) 60%, rgba(12, 34, 28, 0.92) 100%);
+      box-shadow: 0 10px 26px rgba(234, 88, 12, 0.25);
+    }
+
+    .card-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-brand-name {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .card-chip {
+      width: 28px;
+      height: 20px;
+      border-radius: 5px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.1));
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    /* Chips Horizontais */
+    .chips-scroll {
+      display: flex;
+      gap: 7px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+    .chips-scroll::-webkit-scrollbar { display: none; }
+
+    .filter-chip {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-secondary);
+      font-size: 11.5px;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .filter-chip.active {
+      background: rgba(52, 211, 153, 0.18);
+      border-color: var(--emerald-accent);
+      color: var(--emerald-soft);
+    }
+
+    /* Radar News Card */
+    .news-card {
+      background: rgba(8, 28, 21, 0.72);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .news-title {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.38;
+      color: var(--text-primary);
+    }
+
+    .news-summary {
+      font-size: 12.5px;
+      line-height: 1.48;
+      color: var(--text-secondary);
+    }
+
+    .news-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 4px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* Inputs e Formulários */
+    .jade-input, .jade-select, .jade-textarea {
+      width: 100%;
+      background: rgba(4, 17, 12, 0.7);
+      border: 1px solid var(--glass-border);
+      border-radius: 13px;
+      padding: 10px 12px;
+      color: var(--text-primary);
+      font-family: var(--font-ui);
+      font-size: 13px;
+      outline: none;
+    }
+
+    .jade-input:focus, .jade-select:focus, .jade-textarea:focus {
+      border-color: var(--emerald-accent);
+    }
+
+    /* Dock Flutuante Inferior (5 Abas) */
+    .floating-dock {
+      position: fixed;
+      bottom: calc(env(safe-area-inset-bottom, 12px) + 12px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 28px);
+      max-width: 452px;
+      z-index: 40;
+      background: rgba(6, 22, 16, 0.84);
+      border: 1px solid var(--glass-border-strong);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border-radius: 999px;
+      padding: 6px;
+      display: flex;
+      justify-content: space-between;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+    }
+
+    .dock-item {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 7px 4px;
+      border-radius: 999px;
+      font-family: var(--font-ui);
+      font-size: 10.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .dock-item.active {
+      background: rgba(52, 211, 153, 0.18);
+      color: var(--emerald-soft);
+      font-weight: 600;
+    }
+
+    /* Modais & Overlays */
+    .overlay-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: rgba(3, 13, 9, 0.86);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      display: none;
+      flex-direction: column;
+      padding: 20px 16px 32px;
+      overflow-y: auto;
+    }
+
+    .overlay-backdrop.open {
+      display: flex;
+      animation: fadeSlide 0.2s ease;
+    }
+
+    .overlay-inner {
+      max-width: 460px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-80px);
+      z-index: 90;
+      background: rgba(12, 46, 34, 0.95);
+      border: 1px solid var(--emerald-accent);
+      color: var(--text-primary);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 500;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dropzone {
+      display: block;
+      border: 1.5px dashed var(--glass-border-strong);
+      border-radius: 18px;
+      padding: 22px 16px;
+      text-align: center;
+      background: rgba(52, 211, 153, 0.04);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <!-- Papel de Parede Vidro Jade Xiaomi 14 -->
+  <div class="jade-wallpaper">
+    <svg viewBox="0 0 430 932" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="jadeCurve1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#6ee7b7" stop-opacity="0.22" />
+          <stop offset="50%" stop-color="#10b981" stop-opacity="0.06" />
+          <stop offset="100%" stop-color="#a7f3d0" stop-opacity="0.25" />
+        </linearGradient>
+        <linearGradient id="jadeCurve2" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#34d399" stop-opacity="0.16" />
+          <stop offset="100%" stop-color="#042f2e" stop-opacity="0.02" />
+        </linearGradient>
+      </defs>
+      <path d="M-60,180 C120,120 260,290 190,480 C120,670 310,760 490,710 L490,980 L-60,980 Z" fill="url(#jadeCurve2)" />
+      <path d="M180,-40 C90,190 290,340 220,560 C150,780 340,860 480,820" fill="none" stroke="url(#jadeCurve1)" stroke-width="2.2" />
+      <path d="M-40,340 C140,310 210,490 130,680 C70,820 220,910 380,950" fill="none" stroke="url(#jadeCurve1)" stroke-width="1.4" />
+    </svg>
+  </div>
+
+  <div id="toast" class="toast">Atualizado</div>
+
+  <div class="app-shell">
+    <!-- Cabeçalho Superior Limpo -->
+    <header class="top-header">
+      <div>
+        <div class="brand-title"><span class="brand-dot"></span>JADE OS</div>
+        <div class="brand-sub" id="current-date-label">Sexta, 20 de Novembro</div>
+      </div>
+      <div class="header-actions">
+        <button class="mandala-pill-btn" onclick="openModal('mandala-modal')" title="Abrir Mandala Jade">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="9" />
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 3v18M3 12h18" stroke-opacity="0.6"/>
+          </svg>
+          <span class="num" id="header-mandala-score">7.8</span>
+        </button>
+        <button class="icon-circle-btn" onclick="openModal('settings-modal')" title="Configurações e Backup">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ================= ABA 1: INÍCIO (PAINEL + RADAR) ================= -->
+    <section id="view-inicio" class="tab-view active">
+      <div class="segmented-control">
+        <button class="seg-btn active" id="sub-btn-painel" onclick="switchHomeSub('painel')">Painel Executivo</button>
+        <button class="seg-btn" id="sub-btn-radar" onclick="switchHomeSub('radar')">Radar & Notícias</button>
+      </div>
+
+      <!-- Sub-view: Painel -->
+      <div id="home-sub-painel" style="display:flex; flex-direction:column; gap:14px;">
+        <div class="hero-grid">
+          <div class="glass-card">
+            <div class="micro-label">Saldo Livre Mês</div>
+            <div class="metric-val accent num" id="dash-saldo">R$ 2.450</div>
+            <div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">Fluxo operacional</div>
+          </div>
+          <div class="glass-card">
+            <div class="micro-label">Dívida Restante</div>
+            <div class="metric-val warn num" id="dash-divida">R$ 18.400</div>
+            <div class="progress-track">
+              <div class="progress-fill" id="dash-divida-bar" style="width: 34%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="micro-label">Check-in Mental & Energia</span>
+            <span class="num" style="font-size:12px; color:var(--emerald-soft);" id="mood-label">Nível 4/5</span>
+          </div>
+          <div class="mood-row" id="mood-selector">
+            <button class="mood-btn" onclick="setMood(1)">1</button>
+            <button class="mood-btn" onclick="setMood(2)">2</button>
+            <button class="mood-btn" onclick="setMood(3)">3</button>
+            <button class="mood-btn selected" onclick="setMood(4)">4</button>
+            <button class="mood-btn" onclick="setMood(5)">5</button>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="micro-label">Foco Prioritário de Hoje</span>
+            <span class="num" style="font-size:12px; color:var(--text-secondary);" id="today-tasks-count">1/3</span>
+          </div>
+          <div class="list-stack" id="dash-tasks-list"></div>
+        </div>
+
+        <button class="btn-jade" onclick="copyGeminiContext()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L14.8 9.2L22 12L14.8 14.8L12 22L9.2 14.8L2 12L9.2 9.2L12 2Z" />
+          </svg>
+          Copiar Contexto Atual para o Gemini
+        </button>
+      </div>
+
+      <!-- Sub-view: Radar -->
+      <div id="home-sub-radar" style="display:none; flex-direction:column; gap:12px;">
+        <div class="chips-scroll" id="radar-chips">
+          <button class="filter-chip active" onclick="filterRadar('Todos', this)">Todos</button>
+          <button class="filter-chip" onclick="filterRadar('Leis TEA & PCD', this)">Leis TEA & PCD</button>
+          <button class="filter-chip" onclick="filterRadar('Política & Economia', this)">Política & Economia</button>
+          <button class="filter-chip" onclick="filterRadar('BYD & Elétricos', this)">BYD & Elétricos</button>
+          <button class="filter-chip" onclick="filterRadar('Educação & IA', this)">Educação & IA</button>
+        </div>
+
+        <div style="display:flex; gap:8px;">
+          <button class="btn-jade" style="flex:1; padding:10px;" onclick="copyRadarPrompt()">Copiar Varredura Gemini</button>
+          <button class="btn-ghost" onclick="openModal('briefing-modal')">+ Colar Briefing</button>
+        </div>
+
+        <div id="radar-feed-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+      </div>
+    </section>
+
+    <!-- ================= ABA 2: FINANÇAS ================= -->
+    <section id="view-financas" class="tab-view">
+      <div class="segmented-control">
+        <button class="seg-btn active" id="fin-tab-mensal" onclick="switchFinSub('mensal')">Mensal & Cartões</button>
+        <button class="seg-btn" id="fin-tab-dividas" onclick="switchFinSub('dividas')">Dívidas</button>
+        <button class="seg-btn" id="fin-tab-importar" onclick="switchFinSub('importar')">Importar PDF</button>
+      </div>
+
+      <!-- Sub-aba Mensal & Cartões -->
+      <div id="fin-sub-mensal" style="display:flex; flex-direction:column; gap:14px;">
+        <!-- Carrossel Cartões Nubank, Bradesco Prime & Itaú -->
+        <div class="cards-carousel">
+          <div class="bank-card itau">
+            <div class="card-top-row">
+              <span class="card-brand-name">Itaú Uniclass / Click</span>
+              <div class="card-chip"></div>
+            </div>
+            <div>
+              <div class="micro-label" style="color:rgba(255,255,255,0.68);">Fatura Atual</div>
+              <div class="num" style="font-size:22px; font-weight:500; margin-top:2px;" id="card-itau-val">R$ 4.631,24</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.72);">
+              <span>Limite <span class="num">R$ 34.980</span></span>
+              <span>Disp. <span class="num">R$ 15.822</span></span>
+            </div>
+          </div>
+
+          <div class="bank-card nubank">
+            <div class="card-top-row">
+              <span class="card-brand-name">Nubank Ultravioleta</span>
+              <div class="card-chip"></div>
+            </div>
+            <div>
+              <div class="micro-label" style="color:rgba(255,255,255,0.68);">Fatura Atual</div>
+              <div class="num" style="font-size:22px; font-weight:500; margin-top:2px;" id="card-nubank-val">R$ 2.840,00</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.72);">
+              <span>Limite <span class="num">R$ 12.500</span></span>
+              <span>Fecha dia <span class="num">03</span></span>
+            </div>
+          </div>
+
+          <div class="bank-card bradesco">
+            <div class="card-top-row">
+              <span class="card-brand-name">Bradesco Prime</span>
+              <div class="card-chip"></div>
+            </div>
+            <div>
+              <div class="micro-label" style="color:rgba(255,255,255,0.68);">Fatura Atual</div>
+              <div class="num" style="font-size:22px; font-weight:500; margin-top:2px;" id="card-bradesco-val">R$ 4.190,00</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.72);">
+              <span>Limite <span class="num">R$ 28.000</span></span>
+              <span>Fecha dia <span class="num">10</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span class="micro-label">Novo Lançamento Rápido</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 110px; gap:8px; margin-bottom:8px;">
+            <input type="text" id="tx-desc" class="jade-input" placeholder="Ex: Recarga BYD, Mercado, Sessão..." />
+            <input type="number" id="tx-val" class="jade-input num" placeholder="R$ 0,00" />
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <select id="tx-type" class="jade-select">
+              <option value="expense">Saída (-)</option>
+              <option value="income">Entrada (+)</option>
+            </select>
+            <button class="btn-jade" style="padding:10px;" onclick="addTransaction()">+ Lançar</button>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <div class="micro-label">Movimentações Recentes</div>
+          <div class="list-stack" id="tx-list"></div>
+        </div>
+      </div>
+
+      <!-- Sub-aba Recuperação de Dívidas -->
+      <div id="fin-sub-dividas" style="display:none; flex-direction:column; gap:14px;">
+        <div class="glass-card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div class="micro-label">Plano de Quitação</div>
+              <div class="metric-val warn num" id="debt-total-display">R$ 18.400,00</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="micro-label">Amortizado</div>
+              <div class="num" style="font-size:16px; color:var(--emerald-soft); margin-top:4px;" id="debt-paid-display">R$ 9.600,00</div>
+            </div>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="debt-progress-bar" style="width: 34%;"></div>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:12px;">
+            <button class="filter-chip active" id="strat-avalanche" onclick="setDebtStrategy('avalanche')">Avalanche (Maior Juros)</button>
+            <button class="filter-chip" id="strat-snowball" onclick="setDebtStrategy('snowball')">Bola de Neve (Menor Saldo)</button>
+          </div>
+        </div>
+
+        <div id="debts-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+      </div>
+
+      <!-- Sub-aba Importar Faturas / Prints / PDFs (LEITOR REAL PDF.JS + GEMINI AI) -->
+      <div id="fin-sub-importar" style="display:none; flex-direction:column; gap:14px;">
+        <div class="glass-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span class="micro-label">Leitor Real de Faturas (PDF / Print / CSV)</span>
+            <span class="pill-badge" id="ai-reader-status">Gemini + CSV</span>
+          </div>
+          <label class="dropzone" for="statement-file-input">
+            <div style="font-size:14px; font-weight:600; color:var(--emerald-soft);">Selecionar PDF ou Print da Fatura</div>
+            <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">Lê faturas reais do Itaú, Nubank, Bradesco Prime e extratos CSV</div>
+            <input type="file" id="statement-file-input" accept=".pdf,.csv,.txt,image/*" style="display:none;" onchange="handleStatementUpload(event)" />
+          </label>
+
+          <div id="import-loading" style="display:none; text-align:center; padding:14px; color:var(--emerald-soft); font-size:12.5px;">
+            Extraindo lançamentos reais do documento...
+          </div>
+
+          <div id="import-preview-area" style="margin-top:12px; display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:12px; color:var(--emerald-soft); font-weight:600;" id="import-filename">Arquivo carregado</span>
+              <span class="num" style="font-size:12px; color:var(--amber-soft);" id="import-extracted-total">R$ 0,00</span>
+            </div>
+            <div class="list-stack" id="extracted-items-list" style="max-height:260px; overflow-y:auto; margin-bottom:10px;"></div>
+            <details style="margin-bottom:10px;">
+              <summary style="font-size:11px; color:var(--text-secondary); cursor:pointer;">Ver / editar texto bruto extraído</summary>
+              <textarea id="import-raw-text" class="jade-textarea" rows="4" style="margin-top:6px; font-size:11.5px;"></textarea>
+              <button class="btn-ghost" style="margin-top:6px; width:100%;" onclick="reparseFromTextarea()">Reprocessar Texto</button>
+            </details>
+            <select id="import-card" class="jade-select" style="margin-bottom:10px;">
+              <option value="itau">Fatura do Itaú Uniclass / Click (substitui o valor atual)</option>
+              <option value="nubank">Fatura do Nubank Ultravioleta</option>
+              <option value="bradesco">Fatura do Bradesco Prime</option>
+              <option value="">Só extrato (sem cartão)</option>
+            </select>
+            <button class="btn-jade" onclick="confirmExtractedImport()">Importar Todos para o Extrato</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ABA 3: JOÃO (ACOMPANHAMENTO TEA) ================= -->
+    <section id="view-joao" class="tab-view">
+      <div class="segmented-control">
+        <button class="seg-btn active" id="joao-tab-evolucao" onclick="switchJoaoSub('evolucao')">Evolução Diária</button>
+        <button class="seg-btn" id="joao-tab-terapias" onclick="switchJoaoSub('terapias')">Terapias</button>
+        <button class="seg-btn" id="joao-tab-marcos" onclick="switchJoaoSub('marcos')">Marcos</button>
+      </div>
+
+      <div id="joao-sub-evolucao" style="display:flex; flex-direction:column; gap:14px;">
+        <div class="glass-card">
+          <div class="micro-label" style="margin-bottom:10px;">Registro Rápido do João</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+            <select id="joao-reg" class="jade-select">
+              <option value="Regulação: Tranquilo">Regulação: Tranquilo</option>
+              <option value="Regulação: Sensível">Regulação: Sensível</option>
+              <option value="Regulação: Sobrecarga">Regulação: Sobrecarga</option>
+            </select>
+            <select id="joao-sleep" class="jade-select">
+              <option value="Sono: Ótimo">Sono: Ótimo</option>
+              <option value="Sono: Fragmentado">Sono: Fragmentado</option>
+              <option value="Sono: Curto">Sono: Curto</option>
+            </select>
+          </div>
+          <input type="text" id="joao-note" class="jade-input" placeholder="Observação de comunicação, escola ou alimentação..." style="margin-bottom:8px;" />
+          <button class="btn-jade" onclick="addJoaoLog()">+ Registrar Evolução</button>
+        </div>
+
+        <div class="glass-card">
+          <div class="micro-label">Histórico Recente</div>
+          <div class="list-stack" id="joao-logs-list"></div>
+        </div>
+      </div>
+
+      <div id="joao-sub-terapias" style="display:none; flex-direction:column; gap:10px;">
+        <div id="joao-therapies-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+      </div>
+
+      <div id="joao-sub-marcos" style="display:none; flex-direction:column; gap:10px;">
+        <div id="joao-milestones-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+      </div>
+    </section>
+
+    <!-- ================= ABA 4: ROTINA ================= -->
+    <section id="view-rotina" class="tab-view">
+      <div class="glass-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="micro-label">Hábitos Âncora (Alimentam a Mandala)</span>
+          <span class="num" style="font-size:12px; color:var(--emerald-soft);" id="habits-progress-label">0%</span>
+        </div>
+        <div class="list-stack" id="habits-list"></div>
+      </div>
+
+      <div class="glass-card">
+        <div class="micro-label" style="margin-bottom:8px;">Nova Tarefa / Projeto</div>
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+          <input type="text" id="new-task-title" class="jade-input" placeholder="Descreva a entrega..." />
+          <select id="new-task-pillar" class="jade-select" style="width:130px;">
+            <option value="Carreira">Carreira</option>
+            <option value="Finanças">Finanças</option>
+            <option value="Físico">Físico</option>
+            <option value="Família">Família</option>
+            <option value="Educação">Educação</option>
+            <option value="Ambiente">Ambiente</option>
+          </select>
+        </div>
+        <button class="btn-jade" onclick="addTask()">+ Adicionar à Rotina</button>
+
+        <div class="list-stack" id="all-tasks-list" style="margin-top:14px;"></div>
+      </div>
+    </section>
+
+    <!-- ================= ABA 5: NOTAS ================= -->
+    <section id="view-notas" class="tab-view">
+      <div class="glass-card">
+        <div class="micro-label" style="margin-bottom:8px;">Captura Rápida</div>
+        <input type="text" id="note-title" class="jade-input" placeholder="Título da nota..." style="margin-bottom:8px;" />
+        <textarea id="note-body" class="jade-textarea" rows="3" placeholder="Escreva sua ideia, protocolo ou insight..."></textarea>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <input type="text" id="note-tag" class="jade-input" placeholder="#tag (ex: #bradesco, #tea)" />
+          <button class="btn-jade" style="width:130px;" onclick="addNote()">Salvar</button>
+        </div>
+      </div>
+
+      <div id="notes-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+    </section>
+  </div>
+
+  <!-- Dock Flutuante Inferior (5 Abas Fixas) -->
+  <nav class="floating-dock">
+    <button class="dock-item active" onclick="switchTab('inicio', this)">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z" />
+      </svg>
+      <span>Início</span>
+    </button>
+    <button class="dock-item" onclick="switchTab('financas', this)">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="5" width="20" height="14" rx="3" />
+        <line x1="2" y1="10" x2="22" y2="10" />
+      </svg>
+      <span>Finanças</span>
+    </button>
+    <button class="dock-item" onclick="switchTab('joao', this)">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+      </svg>
+      <span>João</span>
+    </button>
+    <button class="dock-item" onclick="switchTab('rotina', this)">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="9 11 12 14 22 4" />
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+      </svg>
+      <span>Rotina</span>
+    </button>
+    <button class="dock-item" onclick="switchTab('notas', this)">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+      </svg>
+      <span>Notas</span>
+    </button>
+  </nav>
+
+  <!-- ================= OVERLAY: MANDALA JADE ================= -->
+  <div id="mandala-modal" class="overlay-backdrop">
+    <div class="overlay-inner">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div class="brand-title">Mandala Jade</div>
+          <div class="brand-sub">Equilíbrio vivo dos 8 pilares</div>
+        </div>
+        <button class="icon-circle-btn" onclick="closeModal('mandala-modal')">✕</button>
+      </div>
+
+      <div class="segmented-control">
+        <button class="seg-btn active" id="mandala-mode-auto" onclick="setMandalaMode('auto')">Automático (Tempo Real)</button>
+        <button class="seg-btn" id="mandala-mode-manual" onclick="setMandalaMode('manual')">Calibração Manual</button>
+      </div>
+
+      <div class="glass-card" style="display:flex; flex-direction:column; align-items:center; padding:20px 12px;">
+        <svg id="mandala-svg" width="300" height="300" viewBox="0 0 300 300"></svg>
+        <div style="font-size:12px; color:var(--text-secondary); margin-top:6px;">
+          Índice Geral: <span class="num" style="color:var(--emerald-soft); font-size:15px; font-weight:600;" id="mandala-modal-avg">7.8 / 10</span>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="micro-label" style="margin-bottom:10px;">Detalhamento dos 8 Pilares</div>
+        <div id="mandala-pillars-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= OVERLAY: CONFIGURAÇÕES & ÍCONE PWA ================= -->
+  <div id="settings-modal" class="overlay-backdrop">
+    <div class="overlay-inner">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div class="brand-title">Configurações & App</div>
+          <div class="brand-sub">Offline-first, Ícone Jade & Backup</div>
+        </div>
+        <button class="icon-circle-btn" onclick="closeModal('settings-modal')">✕</button>
+      </div>
+
+      <!-- Ícone Oficial Jade -->
+      <div class="glass-card" style="display:flex; align-items:center; gap:14px;">
+        <img id="icon-preview-img" src="" alt="Ícone Jade OS" style="width:68px; height:68px; border-radius:18px; border:1px solid var(--glass-border-strong);" />
+        <div style="flex:1;">
+          <div style="font-size:14px; font-weight:600;">Ícone Vidro Jade (512px)</div>
+          <div style="font-size:11.5px; color:var(--text-secondary); margin:3px 0 8px;">Gerado automaticamente para a tela inicial do seu Android.</div>
+          <button class="btn-ghost" onclick="downloadJadeIcon()">Baixar Ícone PNG</button>
+        </div>
+      </div>
+
+      <!-- Chave API Gemini -->
+      <div class="glass-card">
+        <div class="micro-label" style="margin-bottom:8px;">Motor Gemini API (Leitura de Prints e IA)</div>
+        <input type="password" id="gemini-api-key" class="jade-input" placeholder="Cole sua chave AIzaSy..." />
+        <button class="btn-jade" style="margin-top:8px;" onclick="saveApiKey()">Salvar Chave Localmente</button>
+      </div>
+
+      <!-- Backup e Portabilidade -->
+      <div class="glass-card" style="display:flex; flex-direction:column; gap:8px;">
+        <div class="micro-label">Portabilidade & Segurança dos Dados</div>
+        <button class="btn-jade" onclick="exportBackupJSON()">Exportar Backup Completo (.json)</button>
+        <label class="btn-ghost" style="text-align:center; cursor:pointer;">
+          Restaurar Backup (.json)
+          <input type="file" accept=".json" style="display:none;" onchange="importBackupJSON(event)" />
+        </label>
+        <button class="btn-ghost" style="color:var(--rose-soft);" onclick="resetToCleanTemplate()">Gerar Versão Base Limpa (Zerar Dados)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= OVERLAY: COLAR BRIEFING RADAR ================= -->
+  <div id="briefing-modal" class="overlay-backdrop">
+    <div class="overlay-inner">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="brand-title">Importar Briefing no Radar</div>
+        <button class="icon-circle-btn" onclick="closeModal('briefing-modal')">✕</button>
+      </div>
+      <div class="glass-card" style="display:flex; flex-direction:column; gap:10px;">
+        <select id="briefing-cat" class="jade-select">
+          <option value="Leis TEA & PCD">Leis TEA & PCD</option>
+          <option value="Política & Economia">Política & Economia</option>
+          <option value="BYD & Elétricos">BYD & Elétricos</option>
+          <option value="Educação & IA">Educação & IA</option>
+        </select>
+        <input type="text" id="briefing-title" class="jade-input" placeholder="Manchete ou título do resumo..." />
+        <textarea id="briefing-summary" class="jade-textarea" rows="4" placeholder="Cole o resumo gerado pelo Gemini..."></textarea>
+        <button class="btn-jade" onclick="addRadarBriefing()">Adicionar ao Radar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // SafeStorage: localStorage com fallback em memória (nunca quebra em webviews/modo restrito)
+    const SafeStorage = (() => {
+      const mem = {}; let ok = true;
+      try { localStorage.setItem('_t', '1'); localStorage.removeItem('_t'); } catch (e) { ok = false; }
+      return {
+        get(k) { try { return ok ? localStorage.getItem(k) : (mem[k] ?? null); } catch (e) { return mem[k] ?? null; } },
+        set(k, v) { try { ok ? localStorage.setItem(k, v) : (mem[k] = v); } catch (e) { mem[k] = v; } }
+      };
+    })();
+
+    // ================= ESTADO INICIAL & BANCO OFFLINE =================
+    const DB_NAME = 'JadeOS_DB';
+    const STORE_NAME = 'state_store';
+
+    const defaultState = {
+      apiKey: '',
+      mood: 4,
+      mandalaMode: 'auto',
+      debtStrategy: 'avalanche',
+      pillars: [
+        { key: 'Físico', score: 7.5, goal: 'Calistenia 4x/semana & sono regulado' },
+        { key: 'Mental', score: 8.0, goal: 'Clareza mental & comunicação assertiva' },
+        { key: 'Finanças', score: 6.2, goal: 'Amortizar dívidas & manter saldo positivo' },
+        { key: 'Carreira', score: 8.6, goal: 'Entregar dashboard Cash Management' },
+        { key: 'Educação', score: 7.8, goal: 'Automação IA, Python & estudos contínuos' },
+        { key: 'Família', score: 8.8, goal: 'Presença de qualidade com João e Apolo' },
+        { key: 'Lazer', score: 7.0, goal: 'Planejar roteiro de férias & descanso' },
+        { key: 'Ambiente', score: 7.6, goal: 'Organização diária & manutenção do veículo' }
+      ],
+      transactions: [
+        { id: 1, desc: 'Salário / Cash Management', val: 8500, type: 'income', date: '05/11' },
+        { id: 2, desc: 'Terapias João (Coparticipação)', val: 680, type: 'expense', date: '12/11' },
+        { id: 3, desc: 'Recarga Rápida Tatuapé (BYD)', val: 64, type: 'expense', date: '18/11' },
+        { id: 4, desc: 'Assaí Atacadista - Compras Mês', val: 920, type: 'expense', date: '19/11' }
+      ],
+      debts: [
+        { id: 1, name: 'Cartão Rotativo / Parcelado', total: 12000, paid: 4200, rate: 8.9 },
+        { id: 2, name: 'Crédito Pessoal Consolidado', total: 16000, paid: 5400, rate: 2.4 }
+      ],
+      joaoLogs: [
+        { id: 1, date: 'Hoje', reg: 'Regulação: Tranquilo', sleep: 'Sono: Ótimo', note: 'Boa transição na rotina da manhã e ótima interação na escola.' },
+        { id: 2, date: 'Ontem', reg: 'Regulação: Sensível', sleep: 'Sono: Fragmentado', note: 'Sensibilidade maior a barulho no fim da tarde; regulou bem após atividade calma.' }
+      ],
+      joaoTherapies: [
+        { id: 1, name: 'Terapia Ocupacional (Integração Sensorial)', freq: '2x por semana', sessions: 28 },
+        { id: 2, name: 'Fonoaudiologia', freq: '2x por semana', sessions: 31 },
+        { id: 3, name: 'Psicologia / Análise do Comportamento', freq: '2x por semana', sessions: 26 }
+      ],
+      joaoMilestones: [
+        { id: 1, title: 'Comunicação funcional de necessidades e emoções', progress: 78 },
+        { id: 2, title: 'Autorregulação sensorial em ambientes novos', progress: 65 },
+        { id: 3, title: 'Autonomia na rotina matinal e alimentação', progress: 82 }
+      ],
+      habits: [
+        { id: 1, title: 'Treino calistenia / movimento (30 min)', pillar: 'Físico', done: true },
+        { id: 2, title: 'Registrar gastos do dia sem exceção', pillar: 'Finanças', done: true },
+        { id: 3, title: 'Tempo de presença plena com João e Apolo', pillar: 'Família', done: true },
+        { id: 4, title: 'Estudo focado (20 min leitura ou código)', pillar: 'Educação', done: false }
+      ],
+      tasks: [
+        { id: 1, title: 'Consolidar indicadores do painel Cash', pillar: 'Carreira', done: true },
+        { id: 2, title: 'Separar comprovantes de terapias do João', pillar: 'Família', done: false },
+        { id: 3, title: 'Amortizar parcela extra da dívida de maior juros', pillar: 'Finanças', done: false }
+      ],
+      notes: [
+        { id: 1, title: 'Protocolo Regulação Sensorial - João', body: 'Reduzir estímulos luminosos 40 min antes de dormir. Manter previsibilidade visual das atividades do dia seguinte.', tag: '#tea' },
+        { id: 2, title: 'Estratégia Quitação Dívidas', body: 'Priorizar liquidação pelo método Avalanche focando nas linhas com CET acima de 5% a.m.', tag: '#financas' }
+      ],
+      radar: [
+        { id: 1, category: 'Leis TEA & PCD', title: 'Novas diretrizes reforçam cobertura obrigatória de terapias multidisciplinares para TEA sem limite de sessões', summary: 'Decisões recentes consolidam o entendimento de que planos de saúde devem custear integralmente TO, Fono e Psicologia conforme prescrição médica.', time: 'Hoje' },
+        { id: 2, category: 'BYD & Elétricos', title: 'Expansão da rede de recarga rápida em São Paulo reduz tempo de parada em corredores urbanos', summary: 'Novos eletropostos de alta potência na Zona Leste e Marginal Tietê ampliam a autonomia prática para uso diário.', time: 'Hoje' },
+        { id: 3, category: 'Política & Economia', title: 'Debate sobre isenção de IR e programas de renegociação de dívidas ganha tração no Congresso', summary: 'Medidas voltadas ao alívio do endividamento das famílias e recomposição da renda real entram na pauta prioritária.', time: 'Ontem' },
+        { id: 4, category: 'Educação & IA', title: 'Agentes de IA locais e automação de dados transformam produtividade pessoal', summary: 'Fluxos integrando modelos de linguagem e bases estruturadas permitem análises executivas direto do smartphone.', time: 'Ontem' }
+      ]
+    };
+
+    let state = JSON.parse(JSON.stringify(defaultState));
+    let currentRadarFilter = 'Todos';
+    let extractedQueue = [];
+
+    function saveState() {
+      SafeStorage.set('jade_os_state_v3', JSON.stringify(state));
+      if (!window.indexedDB) return;
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME);
+      };
+      req.onsuccess = (e) => {
+        const db = e.target.result;
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).put(state, 'main');
+      };
+    }
+
+    function loadState(callback) {
+      const local = SafeStorage.get('jade_os_state_v3');
+      if (local) {
+        try { state = { ...defaultState, ...JSON.parse(local) }; } catch (e) {}
+      }
+      if (!window.indexedDB) { callback(); return; }
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME);
+      };
+      req.onsuccess = (e) => {
+        const db = e.target.result;
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const getReq = tx.objectStore(STORE_NAME).get('main');
+        getReq.onsuccess = () => {
+          if (getReq.result) state = { ...defaultState, ...getReq.result };
+          callback();
+        };
+        getReq.onerror = () => callback();
+      };
+      req.onerror = () => callback();
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    // ================= ÍCONE VIDRO JADE =================
+    function generateJadeAppIcon() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+
+      const bgGrad = ctx.createLinearGradient(0, 0, 512, 512);
+      bgGrad.addColorStop(0, '#061c14');
+      bgGrad.addColorStop(0.55, '#0f3829');
+      bgGrad.addColorStop(1, '#1e5c45');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 512, 512);
+
+      ctx.save();
+      ctx.strokeStyle = 'rgba(167, 243, 208, 0.28)';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(40, 120);
+      ctx.bezierCurveTo(180, 60, 320, 220, 470, 140);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(40, 390);
+      ctx.bezierCurveTo(200, 310, 310, 460, 480, 360);
+      ctx.stroke();
+      ctx.restore();
+
+      const orbGrad = ctx.createRadialGradient(220, 210, 20, 256, 256, 145);
+      orbGrad.addColorStop(0, 'rgba(167, 243, 208, 0.72)');
+      orbGrad.addColorStop(0.55, 'rgba(52, 211, 153, 0.28)');
+      orbGrad.addColorStop(1, 'rgba(6, 78, 59, 0.12)');
+      ctx.fillStyle = orbGrad;
+      ctx.beginPath();
+      ctx.arc(256, 256, 138, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = 'rgba(209, 250, 229, 0.55)';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(140, 265);
+      ctx.bezierCurveTo(210, 190, 300, 320, 372, 245);
+      ctx.strokeStyle = 'rgba(236, 253, 245, 0.85)';
+      ctx.lineWidth = 6;
+      ctx.stroke();
+
+      const dataUrl = canvas.toDataURL('image/png');
+      const preview = document.getElementById('icon-preview-img');
+      if (preview) preview.src = dataUrl;
+    }
+
+    function downloadJadeIcon() {
+      const src = document.getElementById('icon-preview-img').src;
+      const a = document.createElement('a');
+      a.href = src;
+      a.download = 'jade-os-icon.png';
+      a.click();
+      showToast('Ícone PNG salvo na galeria');
+    }
+
+    // ================= LEITOR REAL DE PDF, CSV E PRINTS =================
+    async function handleStatementUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const loader = document.getElementById('import-loading');
+      const previewArea = document.getElementById('import-preview-area');
+      loader.style.display = 'block';
+      previewArea.style.display = 'none';
+      document.getElementById('import-filename').textContent = file.name;
+
+      try {
+        if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+          if (state.apiKey && state.apiKey.startsWith('AIza')) {
+            await extractWithGeminiVision(file);
+          } else {
+            throw new Error('Para ler PDF, salve a chave Gemini nas Configurações (ou exporte CSV do banco)');
+          }
+        } else if (file.type.startsWith('image/')) {
+          if (state.apiKey && state.apiKey.startsWith('AIza')) {
+            await extractWithGeminiVision(file);
+          } else {
+            document.getElementById('import-raw-text').value = '';
+            extractedQueue = [];
+            renderExtractedQueue();
+            showToast('Cole sua chave Gemini nas Configurações para ler prints automaticamente');
+          }
+        } else {
+          const text = await file.text();
+          document.getElementById('import-raw-text').value = text;
+          parseBrazilianStatementText(text, file.name);
+        }
+      } catch (err) {
+        showToast('Erro ao ler arquivo: ' + err.message);
+      } finally {
+        loader.style.display = 'none';
+        previewArea.style.display = 'block';
+      }
+    }
+
+    async function extractWithGeminiVision(file) {
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const prompt = 'Extraia TODOS os lançamentos de compras/despesas desta fatura ou extrato bancário. Ignore pagamentos efetuados da fatura anterior, totais gerais, limites e a seção Compras parceladas - próximas faturas (parcelas futuras não pertencem a esta fatura). Mantenha o texto da parcela (ex.: 07/09) na descrição. Retorne APENAS um JSON puro no formato: [{"date":"DD/MM","desc":"NOME DO ESTABELECIMENTO","val":123.45}] sem markdown.';
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${state.apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          generationConfig: { responseMimeType: 'application/json' },
+          contents: [{
+            parts: [
+              { text: prompt },
+              { inline_data: { mime_type: file.type || 'application/pdf', data: base64 } }
+            ]
+          }]
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error?.message || ('Gemini respondeu erro ' + res.status));
+      const rawReply = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
+      document.getElementById('import-raw-text').value = rawReply;
+      const cleaned = rawReply.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(cleaned);
+      extractedQueue = parsed.map((item, idx) => ({
+        id: Date.now() + idx,
+        date: item.date || 'Fatura',
+        desc: item.desc || 'Lançamento',
+        val: Math.abs(parseFloat(item.val) || 0),
+        selected: true
+      })).filter(x => x.val > 0);
+      renderExtractedQueue();
+      showToast(`${extractedQueue.length} lançamentos lidos pelo Gemini!`);
+    }
+
+    function parseBrazilianStatementText(text, filename = '') {
+      const cut = text.search(/compras\s+parceladas\s*-?\s*pr[óo]ximas\s+faturas/i);
+      if (cut > 0) text = text.slice(0, cut);
+      const lines = text.split('\n');
+      const ignoreWords = /pagamento|total|limite|dispon[íi]vel|saldo|encargos|juros|multa|iof|pr[óo]xima|demais|cr[ée]dito|m[íi]nimo|encargo|fatura/i;
+      const results = [];
+
+      // Padrão Itaú / Bradesco / Nubank: DD/MM ESTABELECIMENTO ... 1.234,56
+      const regexLine = /(\d{2}\/\d{2})\s+([A-Za-z0-9À-ÿ\*\-\.\s\/]+?)\s+(-?\d{1,3}(?:\.\d{3})*,\d{2})/;
+
+      lines.forEach((rawLine, idx) => {
+        const line = rawLine.trim();
+        if (!line || ignoreWords.test(line)) return;
+        const m = line.match(regexLine);
+        if (m) {
+          const date = m[1];
+          let desc = m[2].replace(/\s+/g, ' ').trim();
+          const numStr = m[3].replace(/\./g, '').replace(',', '.');
+          const val = parseFloat(numStr);
+          if (val > 0 && desc.length >= 2) {
+            results.push({ id: Date.now() + idx, date, desc, val, selected: true });
+          }
+        }
+      });
+
+      extractedQueue = results;
+      renderExtractedQueue();
+      if (results.length > 0) {
+        showToast(`${results.length} lançamentos encontrados no PDF`);
+      } else {
+        showToast('Nenhum padrão DD/MM encontrado; revise o texto bruto');
+      }
+    }
+
+    function reparseFromTextarea() {
+      const txt = document.getElementById('import-raw-text').value;
+      parseBrazilianStatementText(txt);
+    }
+
+    function renderCardBills() {
+      const b = state.cardBills; if (!b) return;
+      ['itau', 'nubank', 'bradesco'].forEach(k => {
+        const el = document.getElementById('card-' + k + '-val');
+        if (el && b[k] != null) el.textContent = formatBRL(b[k]);
+      });
+    }
+
+    function renderExtractedQueue() {
+      const container = document.getElementById('extracted-items-list');
+      const total = extractedQueue.filter(x => x.selected).reduce((a, b) => a + b.val, 0);
+      document.getElementById('import-extracted-total').textContent = formatBRL(total);
+
+      if (extractedQueue.length === 0) {
+        container.innerHTML = `<div style="font-size:12px; color:var(--text-secondary); padding:8px;">Nenhum lançamento detectado ainda.</div>`;
+        return;
+      }
+
+      container.innerHTML = extractedQueue.map((item, idx) => `
+        <div class="check-row ${item.selected ? '' : 'done'}" onclick="toggleExtractedItem(${idx})">
+          <div class="check-left">
+            <div class="jade-checkbox">${item.selected ? '✓' : ''}</div>
+            <div style="min-width:0;">
+              <div class="item-title">${item.desc}</div>
+              <div class="num" style="font-size:10.5px; color:var(--text-secondary);">${item.date}</div>
+            </div>
+          </div>
+          <span class="num" style="font-size:13px; color:var(--rose-soft);">- ${formatBRL(item.val)}</span>
+        </div>
+      `).join('');
+    }
+
+    function toggleExtractedItem(idx) {
+      extractedQueue[idx].selected = !extractedQueue[idx].selected;
+      renderExtractedQueue();
+    }
+
+    function confirmExtractedImport() {
+      const toImport = extractedQueue.filter(x => x.selected);
+      if (toImport.length === 0) return;
+      const cardId = (document.getElementById('import-card') || {}).value || '';
+      if (cardId) {
+        state.cardBills = state.cardBills || { itau: 4631.24, nubank: 2840, bradesco: 4190 };
+        state.cardBills[cardId] = Math.round(toImport.reduce((a, b) => a + b.val, 0) * 100) / 100;
+        renderCardBills();
+      }
+      toImport.forEach((item, i) => {
+        state.transactions.unshift({
+          id: Date.now() + i,
+          desc: item.desc,
+          val: item.val,
+          type: 'expense',
+          date: item.date,
+          card: cardId
+        });
+      });
+      extractedQueue = [];
+      document.getElementById('import-preview-area').style.display = 'none';
+      saveState();
+      renderAll();
+      switchFinSub('mensal');
+      showToast(`${toImport.length} lançamentos adicionados ao extrato!`);
+    }
+
+    // ================= CÁLCULO AUTOMÁTICO DA MANDALA =================
+    function recalculateMandalaScores() {
+      if (state.mandalaMode === 'auto') {
+        state.pillars.forEach(p => {
+          let base = 6.2;
+          const matchingHabits = state.habits.filter(h => h.pillar === p.key);
+          const doneHabits = matchingHabits.filter(h => h.done).length;
+          if (matchingHabits.length > 0) base += (doneHabits / matchingHabits.length) * 2.4;
+
+          const matchingTasks = state.tasks.filter(t => t.pillar === p.key);
+          const doneTasks = matchingTasks.filter(t => t.done).length;
+          if (matchingTasks.length > 0) base += (doneTasks / matchingTasks.length) * 1.2;
+
+          if (p.key === 'Mental') base = 5.5 + (state.mood * 0.8);
+          if (p.key === 'Família' && state.joaoLogs.length > 0) base = Math.min(9.6, base + 0.8);
+          if (p.key === 'Finanças') {
+            const totalDebt = state.debts.reduce((a, b) => a + b.total, 0);
+            const paidDebt = state.debts.reduce((a, b) => a + b.paid, 0);
+            const ratio = totalDebt > 0 ? paidDebt / totalDebt : 1;
+            base = Math.min(9.5, 5.8 + ratio * 3.5);
+          }
+          p.score = Math.round(Math.min(10, Math.max(1, base)) * 10) / 10;
+        });
+      }
+      const avg = (state.pillars.reduce((acc, p) => acc + p.score, 0) / state.pillars.length).toFixed(1);
+      document.getElementById('header-mandala-score').textContent = avg;
+      document.getElementById('mandala-modal-avg').textContent = `${avg} / 10`;
+      renderMandalaSVG();
+    }
+
+    function renderMandalaSVG() {
+      const svg = document.getElementById('mandala-svg');
+      if (!svg) return;
+      const cx = 150, cy = 150, maxR = 105;
+      const count = state.pillars.length;
+      let html = '';
+
+      [0.25, 0.5, 0.75, 1].forEach(r => {
+        html += `<circle cx="${cx}" cy="${cy}" r="${maxR * r}" fill="none" stroke="rgba(167,243,208,0.12)" stroke-width="1" />`;
+      });
+
+      const points = [];
+      state.pillars.forEach((p, i) => {
+        const angle = (Math.PI * 2 * i) / count - Math.PI / 2;
+        const xEnd = cx + Math.cos(angle) * maxR;
+        const yEnd = cy + Math.sin(angle) * maxR;
+        html += `<line x1="${cx}" y1="${cy}" x2="${xEnd}" y2="${yEnd}" stroke="rgba(167,243,208,0.14)" stroke-width="1" />`;
+
+        const rVal = (p.score / 10) * maxR;
+        const px = cx + Math.cos(angle) * rVal;
+        const py = cy + Math.sin(angle) * rVal;
+        points.push(`${px},${py}`);
+
+        const lx = cx + Math.cos(angle) * (maxR + 24);
+        const ly = cy + Math.sin(angle) * (maxR + 24);
+        html += `<text x="${lx}" y="${ly}" fill="#a7c4b5" font-size="10" font-family="Plus Jakarta Sans" text-anchor="middle" dominant-baseline="middle">${p.key}</text>`;
+      });
+
+      html += `<polygon points="${points.join(' ')}" fill="rgba(52, 211, 153, 0.26)" stroke="#6ee7b7" stroke-width="2" />`;
+      points.forEach(pt => {
+        const [px, py] = pt.split(',');
+        html += `<circle cx="${px}" cy="${py}" r="4" fill="#ecfdf5" stroke="#10b981" stroke-width="2" />`;
+      });
+      html += `<circle cx="${cx}" cy="${cy}" r="14" fill="rgba(7, 26, 19, 0.9)" stroke="#34d399" stroke-width="1.5" />`;
+      svg.innerHTML = html;
+
+      const list = document.getElementById('mandala-pillars-list');
+      list.innerHTML = state.pillars.map((p, idx) => `
+        <div style="background:rgba(255,255,255,0.035); padding:10px 12px; border-radius:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:13px; font-weight:600;">${p.key}</span>
+            <span class="num" style="color:var(--emerald-soft); font-size:13px;">${p.score.toFixed(1)}</span>
+          </div>
+          <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">${p.goal}</div>
+          ${state.mandalaMode === 'manual' ? `<input type="range" min="1" max="10" step="0.5" value="${p.score}" style="width:100%; margin-top:6px; accent-color:#34d399;" oninput="updateManualPillar(${idx}, this.value)" />` : ''}
+        </div>
+      `).join('');
+    }
+
+    function setMandalaMode(mode) {
+      state.mandalaMode = mode;
+      document.getElementById('mandala-mode-auto').classList.toggle('active', mode === 'auto');
+      document.getElementById('mandala-mode-manual').classList.toggle('active', mode === 'manual');
+      recalculateMandalaScores();
+      saveState();
+    }
+
+    function updateManualPillar(idx, val) {
+      state.pillars[idx].score = parseFloat(val);
+      recalculateMandalaScores();
+      saveState();
+    }
+
+    // ================= NAVEGAÇÃO =================
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+      document.getElementById(`view-${tabId}`).classList.add('active');
+      document.querySelectorAll('.dock-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function switchHomeSub(sub) {
+      document.getElementById('home-sub-painel').style.display = sub === 'painel' ? 'flex' : 'none';
+      document.getElementById('home-sub-radar').style.display = sub === 'radar' ? 'flex' : 'none';
+      document.getElementById('sub-btn-painel').classList.toggle('active', sub === 'painel');
+      document.getElementById('sub-btn-radar').classList.toggle('active', sub === 'radar');
+    }
+
+    function switchFinSub(sub) {
+      ['mensal', 'dividas', 'importar'].forEach(s => {
+        document.getElementById(`fin-sub-${s}`).style.display = s === sub ? 'flex' : 'none';
+        document.getElementById(`fin-tab-${s}`).classList.toggle('active', s === sub);
+      });
+    }
+
+    function switchJoaoSub(sub) {
+      ['evolucao', 'terapias', 'marcos'].forEach(s => {
+        document.getElementById(`joao-sub-${s}`).style.display = s === sub ? 'flex' : 'none';
+        document.getElementById(`joao-tab-${s}`).classList.toggle('active', s === sub);
+      });
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    // ================= RENDERIZAÇÃO GERAL =================
+    function formatBRL(v) {
+      return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function renderAll() {
+      const income = state.transactions.filter(t => t.type === 'income').reduce((a, b) => a + b.val, 0);
+      const expense = state.transactions.filter(t => t.type === 'expense').reduce((a, b) => a + b.val, 0);
+      const saldo = income - expense;
+      document.getElementById('dash-saldo').textContent = formatBRL(saldo);
+
+      const totalOrig = state.debts.reduce((a, b) => a + b.total, 0);
+      const totalPaid = state.debts.reduce((a, b) => a + b.paid, 0);
+      const remaining = Math.max(0, totalOrig - totalPaid);
+      const pctPaid = totalOrig > 0 ? Math.round((totalPaid / totalOrig) * 100) : 100;
+
+      document.getElementById('dash-divida').textContent = formatBRL(remaining);
+      document.getElementById('dash-divida-bar').style.width = `${pctPaid}%`;
+      document.getElementById('debt-total-display').textContent = formatBRL(remaining);
+      document.getElementById('debt-paid-display').textContent = formatBRL(totalPaid);
+      document.getElementById('debt-progress-bar').style.width = `${pctPaid}%`;
+
+      document.getElementById('mood-label').textContent = `Nível ${state.mood}/5`;
+      document.querySelectorAll('.mood-btn').forEach((b, i) => {
+        b.classList.toggle('selected', i + 1 === state.mood);
+      });
+
+      const doneT = state.tasks.filter(t => t.done).length;
+      document.getElementById('today-tasks-count').textContent = `${doneT}/${state.tasks.length}`;
+      const renderTaskHTML = (t) => `
+        <div class="check-row ${t.done ? 'done' : ''}" onclick="toggleTask(${t.id})">
+          <div class="check-left">
+            <div class="jade-checkbox">${t.done ? '✓' : ''}</div>
+            <span class="item-title">${t.title}</span>
+          </div>
+          <span class="pill-badge">${t.pillar}</span>
+        </div>
+      `;
+      document.getElementById('dash-tasks-list').innerHTML = state.tasks.slice(0, 3).map(renderTaskHTML).join('');
+      document.getElementById('all-tasks-list').innerHTML = state.tasks.map(renderTaskHTML).join('');
+
+      const doneH = state.habits.filter(h => h.done).length;
+      const pctH = state.habits.length ? Math.round((doneH / state.habits.length) * 100) : 0;
+      document.getElementById('habits-progress-label').textContent = `${pctH}%`;
+      document.getElementById('habits-list').innerHTML = state.habits.map(h => `
+        <div class="check-row ${h.done ? 'done' : ''}" onclick="toggleHabit(${h.id})">
+          <div class="check-left">
+            <div class="jade-checkbox">${h.done ? '✓' : ''}</div>
+            <span class="item-title">${h.title}</span>
+          </div>
+          <span class="pill-badge">${h.pillar}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('tx-list').innerHTML = state.transactions.map(tx => `
+        <div class="check-row" style="cursor:default;">
+          <div class="check-left">
+            <span class="item-title">${tx.desc}</span>
+          </div>
+          <span class="num" style="font-size:13px; color:${tx.type === 'income' ? 'var(--emerald-soft)' : 'var(--text-primary)'};">
+            ${tx.type === 'income' ? '+' : '-'} ${formatBRL(tx.val)}
+          </span>
+        </div>
+      `).join('');
+
+      const sortedDebts = [...state.debts].sort((a, b) => {
+        if (state.debtStrategy === 'avalanche') return b.rate - a.rate;
+        return (a.total - a.paid) - (b.total - b.paid);
+      });
+      document.getElementById('debts-list').innerHTML = sortedDebts.map(d => {
+        const rem = Math.max(0, d.total - d.paid);
+        const pct = Math.round((d.paid / d.total) * 100);
+        return `
+          <div class="glass-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:14px; font-weight:600;">${d.name}</span>
+              <span class="pill-badge num">${d.rate}% a.m.</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:8px;">
+              <span class="num" style="font-size:19px; color:var(--amber-soft);">${formatBRL(rem)}</span>
+              <span class="num" style="font-size:11.5px; color:var(--text-secondary);">${pct}% quitado</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
+            <button class="btn-jade" style="margin-top:10px; padding:9px;" onclick="amortizeDebt(${d.id})">+ Amortizar R$ 300</button>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('joao-logs-list').innerHTML = state.joaoLogs.map(l => `
+        <div style="background:rgba(255,255,255,0.035); padding:11px 12px; border-radius:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <span class="pill-badge">${l.reg}</span>
+            <span class="num" style="font-size:11px; color:var(--text-secondary);">${l.sleep} · ${l.date}</span>
+          </div>
+          <div style="font-size:12.5px; color:var(--text-primary); line-height:1.4;">${l.note}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('joao-therapies-list').innerHTML = state.joaoTherapies.map(th => `
+        <div class="glass-card" style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:13.5px; font-weight:600;">${th.name}</div>
+            <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">${th.freq} · <span class="num">${th.sessions}</span> sessões</div>
+          </div>
+          <button class="btn-ghost" onclick="addTherapySession(${th.id})">+ Sessão</button>
+        </div>
+      `).join('');
+
+      document.getElementById('joao-milestones-list').innerHTML = state.joaoMilestones.map(m => `
+        <div class="glass-card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:13px; font-weight:500;">${m.title}</span>
+            <span class="num" style="font-size:13px; color:var(--emerald-soft);">${m.progress}%</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:${m.progress}%;"></div></div>
+        </div>
+      `).join('');
+
+      document.getElementById('notes-list').innerHTML = state.notes.map(n => `
+        <div class="glass-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="font-size:14px; font-weight:600;">${n.title}</span>
+            <span class="pill-badge">${n.tag}</span>
+          </div>
+          <div style="font-size:12.5px; color:var(--text-secondary); line-height:1.45;">${n.body}</div>
+        </div>
+      `).join('');
+
+      const filteredRadar = currentRadarFilter === 'Todos'
+        ? state.radar
+        : state.radar.filter(r => r.category === currentRadarFilter);
+      document.getElementById('radar-feed-list').innerHTML = filteredRadar.map(item => `
+        <div class="news-card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="pill-badge">${item.category}</span>
+            <span class="num" style="font-size:11px; color:var(--text-muted);">${item.time}</span>
+          </div>
+          <div class="news-title">${item.title}</div>
+          <div class="news-summary">${item.summary}</div>
+          <div class="news-footer">
+            <span style="font-size:11px; color:var(--text-secondary);">Radar Curado</span>
+            <button class="btn-ghost" style="padding:5px 10px; font-size:11px;" onclick="saveRadarToNotes(${item.id})">Salvar nas Notas</button>
+          </div>
+        </div>
+      `).join('');
+
+      if (state.apiKey) {
+        document.getElementById('gemini-api-key').value = state.apiKey;
+        document.getElementById('ai-reader-status').textContent = 'Gemini AI + PDF.js Ativos';
+      }
+      recalculateMandalaScores();
+    }
+
+    // ================= AÇÕES INTERATIVAS =================
+    function setMood(val) {
+      state.mood = val;
+      saveState();
+      renderAll();
+      showToast(`Energia atualizada para ${val}/5`);
+    }
+
+    function toggleTask(id) {
+      const t = state.tasks.find(x => x.id === id);
+      if (t) {
+        t.done = !t.done;
+        saveState();
+        renderAll();
+        if (t.done) showToast(`+0.3 no pilar ${t.pillar}`);
+      }
+    }
+
+    function toggleHabit(id) {
+      const h = state.habits.find(x => x.id === id);
+      if (h) {
+        h.done = !h.done;
+        saveState();
+        renderAll();
+        if (h.done) showToast(`Hábito concluído (+${h.pillar})`);
+      }
+    }
+
+    function addTask() {
+      const input = document.getElementById('new-task-title');
+      const pillar = document.getElementById('new-task-pillar').value;
+      if (!input.value.trim()) return;
+      state.tasks.unshift({ id: Date.now(), title: input.value.trim(), pillar, done: false });
+      input.value = '';
+      saveState();
+      renderAll();
+      showToast('Tarefa adicionada');
+    }
+
+    function addTransaction() {
+      const desc = document.getElementById('tx-desc').value.trim();
+      const val = parseFloat(document.getElementById('tx-val').value);
+      const type = document.getElementById('tx-type').value;
+      if (!desc || isNaN(val) || val <= 0) return;
+      state.transactions.unshift({ id: Date.now(), desc, val, type, date: 'Hoje' });
+      document.getElementById('tx-desc').value = '';
+      document.getElementById('tx-val').value = '';
+      saveState();
+      renderAll();
+      showToast('Lançamento registrado');
+    }
+
+    function setDebtStrategy(strat) {
+      state.debtStrategy = strat;
+      document.getElementById('strat-avalanche').classList.toggle('active', strat === 'avalanche');
+      document.getElementById('strat-snowball').classList.toggle('active', strat === 'snowball');
+      saveState();
+      renderAll();
+    }
+
+    function amortizeDebt(id) {
+      const d = state.debts.find(x => x.id === id);
+      if (!d) return;
+      const step = Math.min(300, d.total - d.paid);
+      if (step <= 0) { showToast('Dívida já quitada!'); return; }
+      d.paid += step;
+      state.transactions.unshift({ id: Date.now(), desc: `Amortização: ${d.name}`, val: step, type: 'expense', date: 'Hoje' });
+      saveState();
+      renderAll();
+      showToast(`Amortizado ${formatBRL(step)}!`);
+    }
+
+    function addJoaoLog() {
+      const reg = document.getElementById('joao-reg').value;
+      const sleep = document.getElementById('joao-sleep').value;
+      const note = document.getElementById('joao-note').value.trim() || 'Acompanhamento diário registrado.';
+      state.joaoLogs.unshift({ id: Date.now(), date: 'Hoje', reg, sleep, note });
+      document.getElementById('joao-note').value = '';
+      saveState();
+      renderAll();
+      showToast('Evolução do João registrada');
+    }
+
+    function addTherapySession(id) {
+      const th = state.joaoTherapies.find(x => x.id === id);
+      if (th) {
+        th.sessions += 1;
+        saveState();
+        renderAll();
+        showToast(`Sessão registrada (${th.sessions})`);
+      }
+    }
+
+    function addNote() {
+      const title = document.getElementById('note-title').value.trim();
+      const body = document.getElementById('note-body').value.trim();
+      const tag = document.getElementById('note-tag').value.trim() || '#geral';
+      if (!title || !body) return;
+      state.notes.unshift({ id: Date.now(), title, body, tag });
+      document.getElementById('note-title').value = '';
+      document.getElementById('note-body').value = '';
+      saveState();
+      renderAll();
+      showToast('Nota salva no Segundo Cérebro');
+    }
+
+    function filterRadar(cat, btn) {
+      currentRadarFilter = cat;
+      document.querySelectorAll('#radar-chips .filter-chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      renderAll();
+    }
+
+    function saveRadarToNotes(id) {
+      const item = state.radar.find(r => r.id === id);
+      if (!item) return;
+      state.notes.unshift({ id: Date.now(), title: item.title, body: item.summary, tag: `#radar` });
+      saveState();
+      renderAll();
+      showToast('Salvo nas Notas (+Educação)');
+    }
+
+    function addRadarBriefing() {
+      const category = document.getElementById('briefing-cat').value;
+      const title = document.getElementById('briefing-title').value.trim();
+      const summary = document.getElementById('briefing-summary').value.trim();
+      if (!title || !summary) return;
+      state.radar.unshift({ id: Date.now(), category, title, summary, time: 'Agora' });
+      document.getElementById('briefing-title').value = '';
+      document.getElementById('briefing-summary').value = '';
+      closeModal('briefing-modal');
+      saveState();
+      renderAll();
+      showToast('Briefing adicionado ao Radar');
+    }
+
+    function copyRadarPrompt() {
+      const prompt = `Faça uma varredura das principais notícias de hoje sobre: 1) Leis e direitos TEA/PCD no Brasil; 2) Política e economia brasileira (foco em renda, direitos sociais e crédito); 3) Carros elétricos e BYD no Brasil; 4) Educação e IA. Entregue em tópicos curtos com manchete e resumo de 2 linhas.`;
+      navigator.clipboard.writeText(prompt);
+      showToast('Prompt do Radar copiado!');
+    }
+
+    function copyGeminiContext() {
+      const avg = document.getElementById('header-mandala-score').textContent;
+      const saldo = document.getElementById('dash-saldo').textContent;
+      const divida = document.getElementById('dash-divida').textContent;
+      const summary = `# JADE OS — CONTEXTO ATUAL
+- Mandala Equilíbrio: ${avg}/10
+- Energia Hoje: ${state.mood}/5
+- Saldo Livre Mês: ${saldo}
+- Dívida Restante: ${divida}
+- Último Registro João (TEA): ${state.joaoLogs[0]?.reg} | ${state.joaoLogs[0]?.note}
+- Tarefas Pendentes: ${state.tasks.filter(t => !t.done).map(t => t.title).join('; ')}`;
+      navigator.clipboard.writeText(summary);
+      showToast('Contexto copiado para colar no Gemini!');
+    }
+
+    function saveApiKey() {
+      state.apiKey = document.getElementById('gemini-api-key').value.trim();
+      saveState();
+      renderAll();
+      showToast('Chave Gemini salva localmente');
+    }
+
+    function exportBackupJSON() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `jade-os-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      showToast('Backup JSON exportado');
+    }
+
+    function importBackupJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          state = { ...defaultState, ...JSON.parse(e.target.result) };
+          saveState();
+          renderAll();
+          showToast('Backup restaurado com sucesso!');
+        } catch (err) {
+          showToast('Arquivo JSON inválido');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetToCleanTemplate() {
+      state = {
+        ...defaultState,
+        transactions: [],
+        debts: [],
+        joaoLogs: [],
+        notes: []
+      };
+      saveState();
+      renderAll();
+      showToast('Versão base limpa gerada');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const now = new Date();
+      const opts = { weekday: 'long', day: '2-digit', month: 'long' };
+      const formatted = now.toLocaleDateString('pt-BR', opts);
+      document.getElementById('current-date-label').textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+      generateJadeAppIcon();
+      const pv = document.getElementById('icon-preview-img'); if (pv) pv.src = 'icon-512.png';
+      loadState(() => { renderAll(); renderCardBills(); });
+      if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      }
+    });
+  </script>
+</body>
+</html>
