@@ -867,6 +867,37 @@
         </div>
 
         <div id="debts-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+
+        <div class="glass-card" style="display:flex; flex-direction:column; gap:8px;">
+          <div class="micro-label">Nova dívida</div>
+          <input type="text" id="nd-name" class="jade-input" placeholder="Nome (ex.: Empréstimo Itaú)" />
+          <div style="display:flex; gap:8px;">
+            <input type="number" id="nd-total" class="jade-input num" placeholder="Saldo R$" />
+            <input type="number" id="nd-rate" class="jade-input num" placeholder="Juros % a.m." />
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input type="number" id="nd-parc" class="jade-input num" placeholder="Parcela R$/mês" />
+            <input type="number" id="nd-due" class="jade-input num" placeholder="Dia venc." />
+          </div>
+          <button class="btn-jade" onclick="addDebt()">Adicionar dívida</button>
+        </div>
+
+        <div class="glass-card" style="display:flex; flex-direction:column; gap:8px;">
+          <div class="micro-label">Entradas mensais (renda)</div>
+          <div id="incomes-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+          <input type="text" id="ni-name" class="jade-input" placeholder="Fonte (ex.: Salário, Freelance)" />
+          <div style="display:flex; gap:8px;">
+            <input type="number" id="ni-val" class="jade-input num" placeholder="Valor R$" />
+            <input type="number" id="ni-day" class="jade-input num" placeholder="Dia receb." />
+          </div>
+          <button class="btn-jade" onclick="addIncome()">Adicionar entrada</button>
+        </div>
+
+        <div class="glass-card" style="display:flex; flex-direction:column; gap:8px;">
+          <div class="micro-label">Plano de recuperação</div>
+          <div id="plan-summary" class="num" style="font-size:13px; color:var(--text-secondary);"></div>
+          <button class="btn-jade" onclick="askPlan()">✦ Gerar plano com IA</button>
+        </div>
       </div>
 
       <!-- Sub-aba Importar Faturas / Prints / PDFs (LEITOR REAL PDF.JS + GEMINI AI) -->
@@ -878,7 +909,7 @@
           </div>
           <label class="dropzone" for="statement-file-input">
             <div style="font-size:14px; font-weight:600; color:var(--emerald-soft);">Selecionar PDF ou Print da Fatura</div>
-            <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">Lê faturas reais do Itaú, Nubank, Bradesco Prime e extratos CSV</div>
+            <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">Lê PDF de faturas do Itaú, Nubank e Bradesco, prints (com Gemini) e CSV</div>
             <input type="file" id="statement-file-input" accept=".pdf,.csv,.txt,image/*" style="display:none;" onchange="handleStatementUpload(event)" />
           </label>
 
@@ -1089,6 +1120,7 @@
         <div class="micro-label" style="margin-bottom:8px;">Motor Gemini API (Leitura de Prints e IA)</div>
         <input type="password" id="gemini-api-key" class="jade-input" placeholder="Cole sua chave AIzaSy..." />
         <button class="btn-jade" style="margin-top:8px;" onclick="saveApiKey()">Salvar Chave Localmente</button>
+        <button class="btn-ghost" style="margin-top:8px; width:100%;" onclick="testGemini()">Testar chave e IA</button>
       </div>
 
       <!-- Backup e Portabilidade -->
@@ -1122,6 +1154,28 @@
         <textarea id="briefing-summary" class="jade-textarea" rows="4" placeholder="Cole o resumo gerado pelo Gemini..."></textarea>
         <button class="btn-jade" onclick="addRadarBriefing()">Adicionar ao Radar</button>
       </div>
+    </div>
+  </div>
+
+  <button onclick="openAI()" aria-label="Assistente IA" style="position:fixed; right:18px; bottom:calc(env(safe-area-inset-bottom,0px) + 96px); z-index:40; width:52px; height:52px; border-radius:50%; border:1px solid var(--border-active); background:linear-gradient(135deg,#34d399,#10b981); color:#04120d; font-size:22px; font-weight:800;">✦</button>
+
+  <div id="ai-modal" class="overlay-backdrop">
+    <div class="overlay-inner">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="brand-title">Assistente Financeiro</div>
+        <div style="display:flex; gap:8px;">
+          <button class="icon-circle-btn" onclick="state.chat=[];saveState();renderChat()">⌫</button>
+          <button class="icon-circle-btn" onclick="closeModal('ai-modal')">✕</button>
+        </div>
+      </div>
+      <div id="ai-chat" class="glass-card" style="display:flex; flex-direction:column; gap:8px; max-height:50vh; overflow:auto;"></div>
+      <div style="display:flex; gap:6px; overflow-x:auto;">
+        <button class="filter-chip" onclick="aiSend('Faça o resumo do meu mês: entradas, saídas e o que mais pesou.')">Resumo do mês</button>
+        <button class="filter-chip" onclick="aiSend('Onde posso cortar gastos para quitar dívidas mais rápido?')">Cortar gastos</button>
+        <button class="filter-chip" onclick="askPlan()">Plano</button>
+      </div>
+      <textarea id="ai-input" class="jade-textarea" rows="2" placeholder="Pergunte sobre dívidas, renda, fatura..."></textarea>
+      <button class="btn-jade" id="ai-send" onclick="aiSend()">Enviar</button>
     </div>
   </div>
 
@@ -1326,10 +1380,20 @@
 
       try {
         if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
-          if (state.apiKey && state.apiKey.startsWith('AIza')) {
+          let ok = false;
+          try {
+            const text = await extractPdfText(file);
+            document.getElementById('import-raw-text').value = text;
+            guessCard(file.name, text);
+            parseBrazilianStatementText(text, file.name, true);
+            ok = extractedQueue.length > 0;
+          } catch (e) { console.warn('Leitor local falhou:', e); }
+          if (ok) {
+            showToast(`${extractedQueue.length} lançamentos lidos do PDF`);
+          } else if (state.apiKey && state.apiKey.startsWith('AIza')) {
             await extractWithGeminiVision(file);
           } else {
-            throw new Error('Para ler PDF, salve a chave Gemini nas Configurações (ou exporte CSV do banco)');
+            showToast('Não consegui ler este PDF. Salve a chave Gemini em Configurações ou cole o texto abaixo.');
           }
         } else if (file.type.startsWith('image/')) {
           if (state.apiKey && state.apiKey.startsWith('AIza')) {
@@ -1353,6 +1417,51 @@
       }
     }
 
+    // Chamada ao Gemini com descoberta automática de modelo (se o modelo salvo não existir mais)
+    async function geminiCall(payload) {
+      const key = state.apiKey;
+      if (!key) throw new Error('Salve a chave Gemini em Configurações');
+      if (!navigator.onLine) throw new Error('Sem internet no momento');
+      const base = 'https://generativelanguage.googleapis.com/v1beta/';
+      const post = (m) => fetch(base + 'models/' + m + ':generateContent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify(payload)
+      });
+      let model = state.geminiModel || 'gemini-flash-latest';
+      let res = await post(model);
+      let data = await res.json();
+      if (!res.ok && (res.status === 404 || res.status === 400)) {
+        const lr = await fetch(base + 'models?pageSize=200', { headers: { 'x-goog-api-key': key } });
+        const ld = await lr.json();
+        if (!lr.ok) throw new Error(ld.error?.message || 'Chave inválida');
+        const names = (ld.models || [])
+          .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+          .map(m => m.name.replace('models/', ''));
+        const score = n => { const m = n.match(/^gemini-(\d+(?:\.\d+)?)-flash$/); return m ? parseFloat(m[1]) : -1; };
+        let pick = names.slice().sort((a, b) => score(b) - score(a))[0];
+        if (!pick || score(pick) < 0) pick = names.find(n => /flash/.test(n) && !/image|tts|live|audio|embed/.test(n));
+        if (!pick) throw new Error('Nenhum modelo Gemini disponível para esta chave');
+        model = pick;
+        res = await post(model);
+        data = await res.json();
+      }
+      if (res.ok) { state.geminiModel = model; saveState(); }
+      return { res, data, model };
+    }
+
+    async function testGemini() {
+      showToast('Testando chave...');
+      try {
+        const { res, data, model } = await geminiCall({ contents: [{ parts: [{ text: 'Responda apenas: OK' }] }] });
+        if (!res.ok) throw new Error(data.error?.message || ('Erro ' + res.status));
+        showToast('✓ Funcionando com ' + model);
+      } catch (e) {
+        showToast('Erro: ' + e.message);
+        alert('Erro no Gemini:\n' + e.message);
+      }
+    }
+
     async function extractWithGeminiVision(file) {
       const base64 = await new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -1362,20 +1471,15 @@
       });
 
       const prompt = 'Extraia TODOS os lançamentos de compras/despesas desta fatura ou extrato bancário. Ignore pagamentos efetuados da fatura anterior, totais gerais, limites e a seção Compras parceladas - próximas faturas (parcelas futuras não pertencem a esta fatura). Mantenha o texto da parcela (ex.: 07/09) na descrição. Retorne APENAS um JSON puro no formato: [{"date":"DD/MM","desc":"NOME DO ESTABELECIMENTO","val":123.45}] sem markdown.';
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${state.apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          generationConfig: { responseMimeType: 'application/json' },
-          contents: [{
-            parts: [
-              { text: prompt },
-              { inline_data: { mime_type: file.type || 'application/pdf', data: base64 } }
-            ]
-          }]
-        })
+      const { res, data } = await geminiCall({
+        generationConfig: { responseMimeType: 'application/json' },
+        contents: [{
+          parts: [
+            { text: prompt },
+            { inline_data: { mime_type: file.type || 'application/pdf', data: base64 } }
+          ]
+        }]
       });
-      const data = await res.json();
       if (!res.ok) throw new Error(data.error?.message || ('Gemini respondeu erro ' + res.status));
       const rawReply = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
       document.getElementById('import-raw-text').value = rawReply;
@@ -1392,7 +1496,39 @@
       showToast(`${extractedQueue.length} lançamentos lidos pelo Gemini!`);
     }
 
-    function parseBrazilianStatementText(text, filename = '') {
+    // Leitor de PDF 100% local (pdf.js embutido no app, funciona offline)
+    async function extractPdfText(file) {
+      const pdfjs = await import('./pdf.min.mjs');
+      pdfjs.GlobalWorkerOptions.workerSrc = new URL('./pdf.worker.min.mjs', location.href).href;
+      const pdf = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise;
+      let out = '';
+      for (let p = 1; p <= pdf.numPages; p++) {
+        const content = await (await pdf.getPage(p)).getTextContent();
+        // Segue a ordem de leitura do PDF: nova linha quando muda a altura (y) ou o PDF marca fim de linha
+        let line = '', lastY = null;
+        content.items.forEach(it => {
+          if (it.str === undefined) return;
+          const y = it.transform ? it.transform[5] : 0;
+          if (lastY !== null && Math.abs(y - lastY) > 2 && line.trim()) { out += line.replace(/\s+/g, ' ').trim() + '\n'; line = ''; }
+          if (it.str.trim()) line += (line ? ' ' : '') + it.str.trim();
+          lastY = y;
+          if (it.hasEOL && line.trim()) { out += line.replace(/\s+/g, ' ').trim() + '\n'; line = ''; }
+        });
+        if (line.trim()) out += line.replace(/\s+/g, ' ').trim() + '\n';
+      }
+      return out;
+    }
+
+    function guessCard(name, text) {
+      const t = (name + ' ' + text.slice(0, 600)).toLowerCase();
+      const sel = document.getElementById('import-card');
+      if (!sel) return;
+      if (t.includes('nubank') || t.includes('nu pagamentos') || /\bnu\b/.test(t)) sel.value = 'nubank';
+      else if (t.includes('itaú') || t.includes('itau')) sel.value = 'itau';
+      else if (t.includes('bradesco')) sel.value = 'bradesco';
+    }
+
+    function parseBrazilianStatementText(text, filename = '', quiet = false) {
       const cut = text.search(/compras\s+parceladas\s*-?\s*pr[óo]ximas\s+faturas/i);
       if (cut > 0) text = text.slice(0, cut);
       const lines = text.split('\n');
@@ -1402,8 +1538,19 @@
       // Padrão Itaú / Bradesco / Nubank: DD/MM ESTABELECIMENTO ... 1.234,56
       const regexLine = /(\d{2}\/\d{2})\s+([A-Za-z0-9À-ÿ\*\-\.\s\/]+?)\s+(-?\d{1,3}(?:\.\d{3})*,\d{2})/;
 
+      // Padrão Nubank: "07 OUT •••• 2060 Estabelecimento - Parcela 2/3 R$ 61,74" (estornos/créditos vêm negativos)
+      const MES = { JAN: '01', FEV: '02', MAR: '03', ABR: '04', MAI: '05', JUN: '06', JUL: '07', AGO: '08', SET: '09', OUT: '10', NOV: '11', DEZ: '12' };
+      const regexNu = /^(\d{2})\s+(JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)\s+(?:[•·.*]{2,}\s*\d{4}\s+)?(.+?)\s+([−\-–])?\s*R\$\s*(\d{1,3}(?:\.\d{3})*,\d{2})\s*$/i;
+
       lines.forEach((rawLine, idx) => {
         const line = rawLine.trim();
+        const nu = line.match(regexNu);
+        if (nu && !/^pagamento/i.test(nu[3])) {
+          let v = parseFloat(nu[5].replace(/\./g, '').replace(',', '.'));
+          if (nu[4]) v = -v;
+          results.push({ id: Date.now() + idx, date: nu[1] + '/' + MES[nu[2].toUpperCase()], desc: nu[3].replace(/\s+/g, ' ').trim(), val: v, selected: true });
+          return;
+        }
         if (!line || ignoreWords.test(line)) return;
         const m = line.match(regexLine);
         if (m) {
@@ -1420,9 +1567,9 @@
       extractedQueue = results;
       renderExtractedQueue();
       if (results.length > 0) {
-        showToast(`${results.length} lançamentos encontrados no PDF`);
+        if (!quiet) showToast(`${results.length} lançamentos encontrados`);
       } else {
-        showToast('Nenhum padrão DD/MM encontrado; revise o texto bruto');
+        if (!quiet) showToast('Nenhum lançamento reconhecido; revise o texto bruto');
       }
     }
 
@@ -1458,7 +1605,7 @@
               <div class="num" style="font-size:10.5px; color:var(--text-secondary);">${item.date}</div>
             </div>
           </div>
-          <span class="num" style="font-size:13px; color:var(--rose-soft);">- ${formatBRL(item.val)}</span>
+          <span class="num" style="font-size:13px; color:${item.val < 0 ? 'var(--emerald-soft)' : 'var(--rose-soft)'};">${item.val < 0 ? '+ ' + formatBRL(-item.val) : '- ' + formatBRL(item.val)}</span>
         </div>
       `).join('');
     }
@@ -1481,8 +1628,8 @@
         state.transactions.unshift({
           id: Date.now() + i,
           desc: item.desc,
-          val: item.val,
-          type: 'expense',
+          val: Math.abs(item.val),
+          type: item.val < 0 ? 'income' : 'expense',
           date: item.date,
           card: cardId
         });
@@ -1703,7 +1850,12 @@
               <span class="num" style="font-size:11.5px; color:var(--text-secondary);">${pct}% quitado</span>
             </div>
             <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
+            ${d.parcela ? `<div class="num" style="font-size:11.5px; color:var(--text-secondary); margin-top:6px;">Parcela ${formatBRL(d.parcela)}${d.due ? ' · vence dia ' + d.due : ''}</div>` : ''}
             <button class="btn-jade" style="margin-top:10px; padding:9px;" onclick="amortizeDebt(${d.id})">+ Amortizar R$ 300</button>
+            <div style="display:flex; gap:8px; margin-top:8px;">
+              <button class="btn-ghost" style="flex:1;" onclick="editDebt(${d.id})">Editar</button>
+              <button class="btn-ghost" style="flex:1; color:var(--rose-soft);" onclick="delDebt(${d.id})">Excluir</button>
+            </div>
           </div>
         `;
       }).join('');
@@ -1768,7 +1920,7 @@
 
       if (state.apiKey) {
         document.getElementById('gemini-api-key').value = state.apiKey;
-        document.getElementById('ai-reader-status').textContent = 'Gemini AI + PDF.js Ativos';
+        document.getElementById('ai-reader-status').textContent = 'Leitor local + Gemini';
       }
       recalculateMandalaScores();
     }
@@ -1823,6 +1975,92 @@
       saveState();
       renderAll();
       showToast('Lançamento registrado');
+    }
+
+    // ---------- Finanças: dívidas, rendas, plano e assistente IA ----------
+    function addDebt() {
+      const g = id => document.getElementById(id).value;
+      const name = g('nd-name').trim(), total = parseFloat(g('nd-total'));
+      if (!name || !(total > 0)) return showToast('Informe nome e saldo');
+      state.debts.push({ id: Date.now(), name, total, paid: 0, rate: parseFloat(g('nd-rate')) || 0, parcela: parseFloat(g('nd-parc')) || 0, due: parseInt(g('nd-due')) || 0 });
+      ['nd-name', 'nd-total', 'nd-rate', 'nd-parc', 'nd-due'].forEach(i => document.getElementById(i).value = '');
+      saveState(); renderAll(); showToast('Dívida adicionada');
+    }
+    function editDebt(id) {
+      const d = state.debts.find(x => x.id === id); if (!d) return;
+      const rem = prompt('Saldo restante (R$):', (d.total - d.paid).toFixed(2)); if (rem === null) return;
+      const rate = prompt('Juros % ao mês:', d.rate); if (rate === null) return;
+      const parc = prompt('Parcela mensal (R$, 0 se não houver):', d.parcela || 0); if (parc === null) return;
+      const due = prompt('Dia do vencimento (0 se não houver):', d.due || 0); if (due === null) return;
+      const n = v => parseFloat(String(v).replace(',', '.')) || 0;
+      d.total = d.paid + n(rem); d.rate = n(rate); d.parcela = n(parc); d.due = parseInt(due) || 0;
+      saveState(); renderAll();
+    }
+    function delDebt(id) {
+      if (!confirm('Excluir esta dívida?')) return;
+      state.debts = state.debts.filter(x => x.id !== id); saveState(); renderAll();
+    }
+    function addIncome() {
+      const name = document.getElementById('ni-name').value.trim(), val = parseFloat(document.getElementById('ni-val').value);
+      if (!name || !(val > 0)) return showToast('Informe fonte e valor');
+      state.incomes = state.incomes || [];
+      state.incomes.push({ id: Date.now(), name, val, day: parseInt(document.getElementById('ni-day').value) || 0 });
+      ['ni-name', 'ni-val', 'ni-day'].forEach(i => document.getElementById(i).value = '');
+      saveState(); renderAll(); showToast('Entrada adicionada');
+    }
+    function delIncome(id) { state.incomes = (state.incomes || []).filter(x => x.id !== id); saveState(); renderAll(); }
+    function renderFinExtras() {
+      const inc = state.incomes || [];
+      const renda = inc.reduce((a, b) => a + b.val, 0);
+      const parc = state.debts.reduce((a, b) => a + ((b.total - b.paid) > 0 ? (b.parcela || 0) : 0), 0);
+      const el = document.getElementById('incomes-list');
+      if (el) el.innerHTML = inc.map(i => `<div style="display:flex; justify-content:space-between; align-items:center; font-size:13px;"><span>${i.name}${i.day ? ' · dia ' + i.day : ''}</span><span class="num" style="color:var(--emerald-soft);">${formatBRL(i.val)} <button class="icon-circle-btn" style="width:26px;height:26px;" onclick="delIncome(${i.id})">✕</button></span></div>`).join('') || '<div style="font-size:12px; color:var(--text-secondary);">Nenhuma entrada cadastrada.</div>';
+      const ps = document.getElementById('plan-summary');
+      if (ps) ps.innerHTML = `Renda mensal: ${formatBRL(renda)}<br>Parcelas de dívidas: ${formatBRL(parc)}<br>Sobra antes dos gastos fixos: <b style="color:${renda - parc < 0 ? 'var(--rose-soft)' : 'var(--emerald-soft)'}">${formatBRL(renda - parc)}</b>`;
+    }
+    const _renderAllBase = renderAll;
+    renderAll = function () { _renderAllBase(); renderFinExtras(); };
+
+    function finContext() {
+      const brl = formatBRL, inc = state.incomes || [];
+      const tx = state.transactions;
+      const sum = t => tx.filter(x => x.type === t).reduce((a, b) => a + b.val, 0);
+      const bills = state.cardBills || {};
+      return `Data: ${new Date().toLocaleDateString('pt-BR')}
+ENTRADAS MENSAIS FIXAS: ${inc.map(i => `${i.name} ${brl(i.val)}${i.day ? ' (dia ' + i.day + ')' : ''}`).join('; ') || 'nenhuma cadastrada'}
+DÍVIDAS: ${state.debts.map(d => `${d.name}: saldo ${brl(d.total - d.paid)}, juros ${d.rate}% a.m.${d.parcela ? ', parcela ' + brl(d.parcela) : ''}${d.due ? ', vence dia ' + d.due : ''}`).join(' | ') || 'nenhuma cadastrada'}
+FATURAS DE CARTÃO: ${Object.entries(bills).map(([k, v]) => k + ' ' + brl(v)).join('; ') || 'sem dados'}
+LANÇAMENTOS NO APP: entradas ${brl(sum('income'))}, saídas ${brl(sum('expense'))}. Últimos: ${tx.slice(0, 15).map(x => `${x.type === 'income' ? '+' : '-'}${brl(x.val)} ${x.desc}`).join('; ')}
+ESTRATÉGIA ESCOLHIDA: ${state.debtStrategy === 'avalanche' ? 'Avalanche (maior juros primeiro)' : 'Bola de neve (menor saldo primeiro)'}`;
+    }
+    const AI_SYS = 'Você é o assistente financeiro pessoal do JADE OS. Responda em português do Brasil, direto e com números concretos, em passos curtos. Use somente os dados do contexto; se faltar dado (renda, gastos fixos, parcelas), diga o que falta e pergunte. Não invente valores. Priorize: 1) quitar dívidas de juros mais altos (rotativo, cartão), 2) renegociação e portabilidade quando fizer sentido, 3) corte de gastos, 4) reserva mínima. Você não é consultor certificado; lembre disso em uma frase curta quando der recomendações de peso.';
+    function openAI() { openModal('ai-modal'); renderChat(); }
+    function renderChat(pending) {
+      const c = document.getElementById('ai-chat'); if (!c) return;
+      const msgs = state.chat || [];
+      c.innerHTML = (msgs.length || pending ? '' : '<div style="font-size:12.5px; color:var(--text-secondary);">Cadastre dívidas e entradas na aba Finanças → Dívidas e peça o plano. O assistente vê seus dados financeiros do app.</div>') +
+        msgs.map(m => `<div style="white-space:pre-wrap; font-size:13px; line-height:1.45; padding:9px 11px; border-radius:14px; max-width:92%; ${m.r === 'user' ? 'align-self:flex-end; background:rgba(16,185,129,.22);' : 'background:rgba(255,255,255,.06);'}">${m.t.replace(/[&<>]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch])).replace(/\*\*/g, '')}</div>`).join('') +
+        (pending ? '<div style="font-size:13px; padding:9px 11px;">…</div>' : '');
+      c.scrollTop = c.scrollHeight;
+    }
+    async function aiSend(text) {
+      const inp = document.getElementById('ai-input');
+      const msg = (text || inp.value).trim(); if (!msg) return;
+      openModal('ai-modal');
+      state.chat = (state.chat || []).concat({ r: 'user', t: msg }).slice(-30);
+      inp.value = ''; document.getElementById('ai-send').disabled = true; renderChat(true);
+      try {
+        const { res, data } = await geminiCall({
+          systemInstruction: { parts: [{ text: AI_SYS + '\n\nCONTEXTO ATUAL:\n' + finContext() }] },
+          contents: state.chat.slice(-12).map(c => ({ role: c.r === 'user' ? 'user' : 'model', parts: [{ text: c.t }] }))
+        });
+        if (!res.ok) throw new Error(data.error?.message || ('Erro ' + res.status));
+        state.chat.push({ r: 'model', t: (data.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('') || '(sem resposta)' });
+      } catch (e) { state.chat.push({ r: 'model', t: '⚠ ' + e.message }); }
+      saveState(); renderChat(); document.getElementById('ai-send').disabled = false;
+    }
+    function askPlan() {
+      aiSend('Monte meu plano de recuperação financeira passo a passo: use minhas entradas, dívidas e faturas. Mostre (1) quanto sobra por mês, (2) ordem de pagamento das dívidas e valor mensal para cada uma, (3) estimativa de meses para quitar tudo, (4) o que renegociar ou cortar. Aponte os dados que ainda faltam.');
     }
 
     function setDebtStrategy(strat) {
