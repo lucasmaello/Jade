@@ -774,52 +774,7 @@
       <!-- Sub-aba Mensal & Cartões -->
       <div id="fin-sub-mensal" style="display:flex; flex-direction:column; gap:14px;">
         <!-- Carrossel Cartões Nubank, Bradesco Prime & Itaú -->
-        <div class="cards-carousel">
-          <div class="bank-card itau">
-            <div class="card-top-row">
-              <span class="card-brand-name">Itaú Uniclass / Click</span>
-              <div class="card-chip"></div>
-            </div>
-            <div>
-              <div class="micro-label" style="color:rgba(255,255,255,0.68);">Fatura Atual</div>
-              <div class="num" style="font-size:22px; font-weight:500; margin-top:2px;" id="card-itau-val">R$ 4.631,24</div>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.72);">
-              <span>Limite <span class="num">R$ 34.980</span></span>
-              <span>Disp. <span class="num">R$ 15.822</span></span>
-            </div>
-          </div>
-
-          <div class="bank-card nubank">
-            <div class="card-top-row">
-              <span class="card-brand-name">Nubank Ultravioleta</span>
-              <div class="card-chip"></div>
-            </div>
-            <div>
-              <div class="micro-label" style="color:rgba(255,255,255,0.68);">Fatura Atual</div>
-              <div class="num" style="font-size:22px; font-weight:500; margin-top:2px;" id="card-nubank-val">R$ 2.840,00</div>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.72);">
-              <span>Limite <span class="num">R$ 12.500</span></span>
-              <span>Fecha dia <span class="num">03</span></span>
-            </div>
-          </div>
-
-          <div class="bank-card bradesco">
-            <div class="card-top-row">
-              <span class="card-brand-name">Bradesco Prime</span>
-              <div class="card-chip"></div>
-            </div>
-            <div>
-              <div class="micro-label" style="color:rgba(255,255,255,0.68);">Fatura Atual</div>
-              <div class="num" style="font-size:22px; font-weight:500; margin-top:2px;" id="card-bradesco-val">R$ 4.190,00</div>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.72);">
-              <span>Limite <span class="num">R$ 28.000</span></span>
-              <span>Fecha dia <span class="num">10</span></span>
-            </div>
-          </div>
-        </div>
+        <div class="cards-carousel" id="cards-carousel"></div>
 
         <div class="glass-card">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -829,6 +784,12 @@
             <input type="text" id="tx-desc" class="jade-input" placeholder="Ex: Recarga BYD, Mercado, Sessão..." />
             <input type="number" id="tx-val" class="jade-input num" placeholder="R$ 0,00" />
           </div>
+          <select id="tx-card" class="jade-select" style="margin-bottom:8px;">
+            <option value="">Conta corrente / dinheiro</option>
+            <option value="itau">Cartão Itaú</option>
+            <option value="nubank">Cartão Nubank</option>
+            <option value="bradesco">Cartão Bradesco</option>
+          </select>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
             <select id="tx-type" class="jade-select">
               <option value="expense">Saída (-)</option>
@@ -910,7 +871,7 @@
           <label class="dropzone" for="statement-file-input">
             <div style="font-size:14px; font-weight:600; color:var(--emerald-soft);">Selecionar PDF ou Print da Fatura</div>
             <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">Lê PDF de faturas do Itaú, Nubank e Bradesco, prints (com Gemini) e CSV</div>
-            <input type="file" id="statement-file-input" accept=".pdf,.csv,.txt,image/*" style="display:none;" onchange="handleStatementUpload(event)" />
+            <input type="file" id="statement-file-input" accept=".pdf,.csv,.txt,.ofx,image/*" multiple style="display:none;" onchange="handleStatementUpload(event)" />
           </label>
 
           <div id="import-loading" style="display:none; text-align:center; padding:14px; color:var(--emerald-soft); font-size:12.5px;">
@@ -928,6 +889,7 @@
               <textarea id="import-raw-text" class="jade-textarea" rows="4" style="margin-top:6px; font-size:11.5px;"></textarea>
               <button class="btn-ghost" style="margin-top:6px; width:100%;" onclick="reparseFromTextarea()">Reprocessar Texto</button>
             </details>
+            <div id="import-check" style="font-size:12.5px; margin-bottom:10px;"></div>
             <select id="import-card" class="jade-select" style="margin-bottom:10px;">
               <option value="itau">Fatura do Itaú Uniclass / Click (substitui o valor atual)</option>
               <option value="nubank">Fatura do Nubank Ultravioleta</option>
@@ -1159,6 +1121,8 @@
 
   <button onclick="openAI()" aria-label="Assistente IA" style="position:fixed; right:18px; bottom:calc(env(safe-area-inset-bottom,0px) + 96px); z-index:40; width:52px; height:52px; border-radius:50%; border:1px solid var(--border-active); background:linear-gradient(135deg,#34d399,#10b981); color:#04120d; font-size:22px; font-weight:800;">✦</button>
 
+  <div id="card-modal" class="overlay-backdrop"><div class="overlay-inner" id="card-modal-body"></div></div>
+
   <div id="ai-modal" class="overlay-backdrop">
     <div class="overlay-inner">
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1368,53 +1332,129 @@
     }
 
     // ================= LEITOR REAL DE PDF, CSV E PRINTS =================
+    const hasKey = () => state.apiKey && state.apiKey.startsWith('AIza');
+    const qSum = l => Math.round(l.reduce((a, b) => a + b.val, 0) * 100) / 100;
+    const qErr = (l, tot) => tot && tot.length ? Math.min(...tot.map(t => Math.abs(qSum(l) - t))) : 0;
+
     async function handleStatementUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const loader = document.getElementById('import-loading');
-      const previewArea = document.getElementById('import-preview-area');
-      loader.style.display = 'block';
-      previewArea.style.display = 'none';
-      document.getElementById('import-filename').textContent = file.name;
-
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+      const loader = document.getElementById('import-loading'), previewArea = document.getElementById('import-preview-area');
+      loader.style.display = 'block'; previewArea.style.display = 'none';
+      document.getElementById('import-filename').textContent = files.length > 1 ? files.length + ' arquivos' : files[0].name;
+      const acc = [], seen = new Set(); window._declTotals = null; window._pendingMeta = null;
       try {
-        if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
-          let ok = false;
-          try {
-            const text = await extractPdfText(file);
-            document.getElementById('import-raw-text').value = text;
-            guessCard(file.name, text);
-            parseBrazilianStatementText(text, file.name, true);
-            ok = extractedQueue.length > 0;
-          } catch (e) { console.warn('Leitor local falhou:', e); }
-          if (ok) {
-            showToast(`${extractedQueue.length} lançamentos lidos do PDF`);
-          } else if (state.apiKey && state.apiKey.startsWith('AIza')) {
-            await extractWithGeminiVision(file);
-          } else {
-            showToast('Não consegui ler este PDF. Salve a chave Gemini em Configurações ou cole o texto abaixo.');
-          }
-        } else if (file.type.startsWith('image/')) {
-          if (state.apiKey && state.apiKey.startsWith('AIza')) {
-            await extractWithGeminiVision(file);
-          } else {
-            document.getElementById('import-raw-text').value = '';
-            extractedQueue = [];
-            renderExtractedQueue();
-            showToast('Cole sua chave Gemini nas Configurações para ler prints automaticamente');
-          }
-        } else {
-          const text = await file.text();
-          document.getElementById('import-raw-text').value = text;
-          parseBrazilianStatementText(text, file.name);
+        for (const file of files) {
+          extractedQueue = [];
+          try { await processStatementFile(file); } catch (err) { showToast('Erro em ' + file.name + ': ' + err.message); }
+          extractedQueue.forEach(x => { const k = [x.date, x.desc, x.val.toFixed(2)].join('|'); if (!seen.has(k) || files.length === 1) { seen.add(k); acc.push(x); } });
         }
-      } catch (err) {
-        showToast('Erro ao ler arquivo: ' + err.message);
       } finally {
-        loader.style.display = 'none';
-        previewArea.style.display = 'block';
+        extractedQueue = acc.map((x, i) => ({ ...x, id: Date.now() + i, selected: x.selected !== false }));
+        renderExtractedQueue();
+        loader.style.display = 'none'; previewArea.style.display = 'block';
+        event.target.value = '';
       }
+    }
+
+    async function processStatementFile(file) {
+      const name = file.name.toLowerCase();
+      if (file.type === 'application/pdf' || name.endsWith('.pdf')) {
+        let text = '';
+        try { text = await extractPdfText(file); } catch (e) { console.warn('Leitor local falhou:', e); }
+        document.getElementById('import-raw-text').value = text;
+        if (text) { guessCard(file.name, text); window._pendingMeta = parseCardMeta(text); smartExtract(text, file.name); }
+        const bad = !extractedQueue.length || qErr(extractedQueue, window._declTotals) > 0.02;
+        if (bad && hasKey()) {
+          const local = extractedQueue.slice();
+          try { await extractWithGeminiVision(file); } catch (e) { extractedQueue = local; if (!local.length) throw e; }
+          if (local.length && qErr(local, window._declTotals) <= qErr(extractedQueue, window._declTotals)) extractedQueue = local;
+        } else if (!extractedQueue.length) showToast('Não consegui ler este PDF. Salve a chave Gemini em Configurações ou cole o texto abaixo.');
+      } else if (file.type.startsWith('image/')) {
+        if (!hasKey()) { showToast('Para ler prints, salve a chave Gemini em Configurações'); return; }
+        await extractWithGeminiVision(file);
+      } else {
+        const text = await file.text();
+        document.getElementById('import-raw-text').value = text;
+        if (name.endsWith('.ofx')) { extractedQueue = parseOFXText(text); return; }
+        smartExtract(text, file.name);
+      }
+    }
+
+    function parseOFXText(t) {
+      const out = [];
+      (t.match(/<STMTTRN>[\s\S]*?(?=<\/STMTTRN>|<STMTTRN>|$)/gi) || []).forEach((b, i) => {
+        const a = (b.match(/<TRNAMT>\s*([-\d.,]+)/i) || [])[1], d = (b.match(/<DTPOSTED>\s*(\d{4})(\d{2})(\d{2})/i) || []), m = (b.match(/<(?:MEMO|NAME)>\s*([^<\r\n]+)/i) || [])[1];
+        if (a && m) out.push({ id: i, date: d[3] ? d[3] + '/' + d[2] : '', desc: m.trim().slice(0, 60), val: -parseFloat(a.replace(',', '.')), selected: true });
+      });
+      return out;
+    }
+
+    // Totais declarados na fatura (para conferir a soma dos lançamentos)
+    function declaredTotals(text) {
+      const out = new Set(), num = v => Math.round(parseFloat(v.replace(/\./g, '').replace(',', '.')) * 100) / 100;
+      const M = '(\\d{1,3}(?:\\.\\d{3})*,\\d{2})';
+      [new RegExp('Total (?:desta fatura|da fatura(?!\\s*anterior)|a pagar|dos lan[cç]amentos atuais|geral da fatura)[^\\d\\n-]{0,40}R?\\$?\\s*' + M, 'gi'),
+       new RegExp('Valor (?:total )?da fatura[^\\d\\n]{0,40}R\\$\\s*' + M, 'gi'),
+       new RegExp('no valor de\\s*R\\$\\s*' + M, 'gi'),
+       new RegExp('Total da fatura[^\\d\\n]{0,30}' + M, 'gi')].forEach(re => { let m; while ((m = re.exec(text))) out.add(num(m[1])); });
+      return [...out];
+    }
+
+    // Leitor genérico: data no início da linha + valor; aceita 10/10, 10/10/2026, 10 OUT, 10 de out, CSV, valor na linha seguinte, crédito (CR / -)
+    function parseGenericStatement(text) {
+      const cut = text.search(/compras\s+parceladas\s*-?\s*pr[óo]ximas\s+faturas/i);
+      if (cut > 0) text = text.slice(0, cut);
+      const MES = { jan: '01', fev: '02', mar: '03', abr: '04', mai: '05', jun: '06', jul: '07', ago: '08', set: '09', out: '10', nov: '11', dez: '12' };
+      const dNum = /^(?:[•·*.\d]{4,}\s+)?(\d{1,2})[\/.\-](\d{1,2})(?:[\/.\-]\d{2,4})?\s+/;
+      const dTxt = /^(\d{1,2})\s+(?:de\s+)?(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)[a-zç]*\.?(?:\s+(?:de\s+)?\d{2,4})?\s+/i;
+      const money = /(?:^|\s)([−–-])?\s*(?:R\$\s*)?([−–-])?\s*(\d{1,3}(?:\.\d{3})*,\d{2})(?!\d)(\s*(?:CR|C|-))?(?=\s|$)/;
+      const EXC = /pagamento|pgto|pagto|saldo (anterior|da fatura)|fatura anterior|\btotal\b|subtotal/i;
+      const lines = text.split('\n').map(l => l.replace(/[;\t"]/g, ' ').replace(/\s+/g, ' ').trim());
+      const out = [];
+      lines.forEach((l, i) => {
+        let date, rest;
+        let m = l.match(dTxt);
+        if (m) { date = m[1].padStart(2, '0') + '/' + MES[m[2].toLowerCase()]; rest = l.slice(m[0].length); }
+        else if ((m = l.match(dNum)) && +m[1] <= 31 && +m[2] <= 12) { date = m[1].padStart(2, '0') + '/' + m[2].padStart(2, '0'); rest = l.slice(m[0].length); }
+        else return;
+        let mm = rest.match(money), desc, sign, tail, v;
+        if (mm) { desc = rest.slice(0, mm.index); sign = mm[1] || mm[2]; v = mm[3]; tail = mm[4]; }
+        else {
+          const m2 = (lines[i + 1] || '').match(/^([−–-])?\s*(?:R\$\s*)?([−–-])?\s*(\d{1,3}(?:\.\d{3})*,\d{2})(\s*(?:CR|C|-))?$/);
+          if (!m2) return; desc = rest; sign = m2[1] || m2[2]; v = m2[3]; tail = m2[4];
+        }
+        desc = desc.replace(/^[•·*.\d]{4,}\s+/, '').replace(/\s+R\$$/, '').trim();
+        if (desc.length < 2 || !/[A-Za-zÀ-ú]{2}/.test(desc) || EXC.test(desc)) return;
+        let val = parseFloat(v.replace(/\./g, '').replace(',', '.'));
+        if (sign || tail) val = -val;
+        out.push({ date, desc: desc.slice(0, 60), val, selected: true });
+      });
+      return out;
+    }
+
+    // Roda os dois leitores e fica com o que bate melhor com o total da fatura
+    function smartExtract(text, filename) {
+      parseBrazilianStatementText(text, filename, true);
+      const A = extractedQueue.slice(), B = parseGenericStatement(text);
+      const tot = declaredTotals(text); window._declTotals = tot.length ? tot : null;
+      let best = A;
+      if (!A.length) best = B;
+      else if (B.length) best = tot.length ? (qErr(B, tot) < qErr(A, tot) - 0.005 ? B : A) : (B.length > A.length ? B : A);
+      extractedQueue = best.map((x, i) => ({ ...x, id: Date.now() + i, selected: true }));
+    }
+
+    async function fileToInline(file) {
+      if (file.type.startsWith('image/')) {
+        try {
+          const bmp = await createImageBitmap(file), sc = Math.min(1, 1800 / Math.max(bmp.width, bmp.height));
+          const c = document.createElement('canvas'); c.width = Math.round(bmp.width * sc); c.height = Math.round(bmp.height * sc);
+          c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+          return { mime: 'image/jpeg', data: c.toDataURL('image/jpeg', 0.85).split(',')[1] };
+        } catch (e) { /* usa o arquivo original */ }
+      }
+      const data = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(file); });
+      return { mime: file.type || 'application/pdf', data };
     }
 
     // Chamada ao Gemini com descoberta automática de modelo (se o modelo salvo não existir mais)
@@ -1463,20 +1503,14 @@
     }
 
     async function extractWithGeminiVision(file) {
-      const base64 = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-
-      const prompt = 'Extraia TODOS os lançamentos de compras/despesas desta fatura ou extrato bancário. Ignore pagamentos efetuados da fatura anterior, totais gerais, limites e a seção Compras parceladas - próximas faturas (parcelas futuras não pertencem a esta fatura). Mantenha o texto da parcela (ex.: 07/09) na descrição. Retorne APENAS um JSON puro no formato: [{"date":"DD/MM","desc":"NOME DO ESTABELECIMENTO","val":123.45}] sem markdown.';
+      const inl = await fileToInline(file);
+      const prompt = `Você lê faturas de cartão, extratos e prints de aplicativos bancários brasileiros. Hoje é ${new Date().toLocaleDateString('pt-BR')}. Extraia TODOS os lançamentos individuais visíveis (compras, parcelas, tarifas, juros, IOF, estornos, créditos). NÃO inclua: pagamentos da fatura anterior, totais, subtotais, limites, saldos, resumos e a seção de parcelas de próximas faturas. Mantenha o texto da parcela na descrição (ex.: "Loja - Parcela 3/10"). Datas em DD/MM (para "Hoje" ou "Ontem" use a data real). Em val use número positivo para compras e saídas e NEGATIVO para estornos, créditos e entradas. Retorne APENAS JSON puro, sem markdown: [{"date":"DD/MM","desc":"ESTABELECIMENTO","val":123.45}]`;
       const { res, data } = await geminiCall({
         generationConfig: { responseMimeType: 'application/json' },
         contents: [{
           parts: [
             { text: prompt },
-            { inline_data: { mime_type: file.type || 'application/pdf', data: base64 } }
+            { inline_data: { mime_type: inl.mime, data: inl.data } }
           ]
         }]
       });
@@ -1489,9 +1523,9 @@
         id: Date.now() + idx,
         date: item.date || 'Fatura',
         desc: item.desc || 'Lançamento',
-        val: Math.abs(parseFloat(item.val) || 0),
+        val: typeof item.val === 'number' ? item.val : (parseFloat(String(item.val).replace(/[^\d,.\-]/g, '').replace(/\.(?=\d{3}\b)/g, '').replace(',', '.')) || 0),
         selected: true
-      })).filter(x => x.val > 0);
+      })).filter(x => x.val !== 0);
       renderExtractedQueue();
       showToast(`${extractedQueue.length} lançamentos lidos pelo Gemini!`);
     }
@@ -1603,7 +1637,18 @@
       });
     }
 
+    const isPaymentLine = d => /pagamento|pgto|fatura anterior|saldo (anterior|restante)|total da fatura/i.test(d) && !/estorno|cr[eé]dito de/i.test(d);
     function renderExtractedQueue() {
+      extractedQueue = extractedQueue.filter(x => !isPaymentLine(x.desc));
+      const chk = document.getElementById('import-check');
+      if (chk) {
+        const sel = extractedQueue.filter(x => x.selected), sum = qSum(sel), tot = window._declTotals;
+        if (!extractedQueue.length) chk.innerHTML = '';
+        else if (tot && tot.length) {
+          const best = tot.reduce((a, t) => Math.abs(sum - t) < Math.abs(sum - a) ? t : a, tot[0]), d = Math.abs(Math.round((sum - best) * 100) / 100);
+          chk.innerHTML = d < 0.02 ? `<span style="color:var(--emerald-soft);">✓ Soma confere com o total da fatura (${formatBRL(best)})</span>` : `<span style="color:var(--amber, #fbbf24);">⚠ Soma ${formatBRL(sum)} difere do total da fatura (${formatBRL(best)}) em ${formatBRL(d)}. Revise a lista.</span>`;
+        } else chk.innerHTML = `<span style="color:var(--text-secondary);">Total da fatura não encontrado no arquivo. Soma lida: ${formatBRL(sum)}</span>`;
+      }
       const container = document.getElementById('extracted-items-list');
       const total = extractedQueue.filter(x => x.selected).reduce((a, b) => a + b.val, 0);
       document.getElementById('import-extracted-total').textContent = formatBRL(total);
@@ -1651,9 +1696,13 @@
     }
 
     function confirmExtractedImport() {
-      const toImport = extractedQueue.filter(x => x.selected);
+      const toImport = extractedQueue.filter(x => x.selected && !isPaymentLine(x.desc));
       if (toImport.length === 0) return;
       const cardId = (document.getElementById('import-card') || {}).value || '';
+      if (cardId) {
+        state.transactions = state.transactions.filter(t => t.card !== cardId);
+        if (window._pendingMeta) { state.cardMeta = state.cardMeta || {}; state.cardMeta[cardId] = Object.assign(state.cardMeta[cardId] || {}, window._pendingMeta); window._pendingMeta = null; }
+      }
       if (cardId) {
         state.cardBills = state.cardBills || { itau: 4631.24, nubank: 2840, bradesco: 4190 };
         state.cardBills[cardId] = Math.round(toImport.reduce((a, b) => a + b.val, 0) * 100) / 100;
@@ -1862,16 +1911,18 @@
         </div>
       `).join('');
 
-      document.getElementById('tx-list').innerHTML = state.transactions.map(tx => `
+      const cn = { itau: 'Itaú', nubank: 'Nubank', bradesco: 'Bradesco' };
+      document.getElementById('tx-list').innerHTML = state.transactions.slice(0, 40).map(tx => `
         <div class="check-row" style="cursor:default;">
-          <div class="check-left">
+          <div class="check-left" style="flex-direction:column; align-items:flex-start; gap:2px;">
             <span class="item-title">${tx.desc}</span>
+            <span style="font-size:10.5px; color:var(--text-secondary);">${tx.date}${tx.card ? ' · ' + cn[tx.card] : ''}</span>
           </div>
           <span class="num" style="font-size:13px; color:${tx.type === 'income' ? 'var(--emerald-soft)' : 'var(--text-primary)'};">
-            ${tx.type === 'income' ? '+' : '-'} ${formatBRL(tx.val)}
+            ${tx.type === 'income' ? '+' : '-'} ${formatBRL(tx.val)} <button class="icon-circle-btn" style="width:24px;height:24px;font-size:11px;" onclick="deleteTx(${tx.id})">✕</button>
           </span>
         </div>
-      `).join('');
+      `).join('') + (state.transactions.length > 40 ? `<div style="font-size:11.5px; color:var(--text-secondary); padding:6px 2px;">+ ${state.transactions.length - 40} lançamentos antigos. Toque no cartão para ver os dele.</div>` : '');
 
       const sortedDebts = [...state.debts].sort((a, b) => {
         if (state.debtStrategy === 'avalanche') return b.rate - a.rate;
@@ -2010,13 +2061,104 @@
       const val = parseFloat(document.getElementById('tx-val').value);
       const type = document.getElementById('tx-type').value;
       if (!desc || isNaN(val) || val <= 0) return;
-      state.transactions.unshift({ id: Date.now(), desc, val, type, date: 'Hoje' });
+      const card = document.getElementById('tx-card').value;
+      state.transactions.unshift({ id: Date.now(), desc, val, type, date: 'Hoje', card, manual: true });
+      if (card) { state.cardBills = getBills(); state.cardBills[card] = Math.max(0, state.cardBills[card] + (type === 'expense' ? val : -val)); }
       document.getElementById('tx-desc').value = '';
       document.getElementById('tx-val').value = '';
       saveState();
       renderAll();
       showToast('Lançamento registrado');
     }
+
+    function deleteTx(id) {
+      const t = state.transactions.find(x => x.id === id); if (!t) return;
+      if (t.card && t.manual) { state.cardBills = getBills(); state.cardBills[t.card] = Math.max(0, state.cardBills[t.card] - (t.type === 'expense' ? t.val : -t.val)); }
+      state.transactions = state.transactions.filter(x => x.id !== id); saveState(); renderAll();
+    }
+    // ---------- Cartões: tiles, tela do cartão, parcelas e projeção ----------
+    const CARD_DEFAULTS = {
+      itau: { name: 'Itaú Uniclass / Click', limit: 34980, close: 4, due: 11 },
+      nubank: { name: 'Nubank Ultravioleta', limit: 11200, close: 7, due: 16 },
+      bradesco: { name: 'Bradesco Prime', limit: 28000, close: 10, due: 0 }
+    };
+    const CARD_DEBT = { nubank: 9001, itau: 9002, bradesco: 9003 };
+    const cardMeta = id => Object.assign({}, CARD_DEFAULTS[id], (state.cardMeta || {})[id]);
+    const getBills = () => Object.assign({ itau: 4631.24, nubank: 2840, bradesco: 4190 }, state.cardBills || {});
+    function cardNums(id) {
+      const m = cardMeta(id), bill = getBills()[id] || 0;
+      const d = state.debts.find(x => x.id === CARD_DEBT[id]), parc = d ? d.total - d.paid : 0;
+      return { m, bill, parc, used: bill + parc, avail: m.limit - bill - parc };
+    }
+    const dd = n => n ? 'dia ' + String(n).padStart(2, '0') : '—';
+    function renderCards() {
+      const el = document.getElementById('cards-carousel'); if (!el) return;
+      el.innerHTML = ['itau', 'nubank', 'bradesco'].map(id => {
+        const { m, bill, avail } = cardNums(id);
+        return `<div class="bank-card ${id}" onclick="openCard('${id}')" style="cursor:pointer;">
+          <div class="card-top-row"><span class="card-brand-name">${m.name}</span><div class="card-chip"></div></div>
+          <div><div class="micro-label" style="color:rgba(255,255,255,0.68);">Fatura atual</div>
+          <div class="num" style="font-size:22px; font-weight:500; margin-top:2px;" id="card-${id}-val">${formatBRL(bill)}</div></div>
+          <div style="font-size:10.5px; color:rgba(255,255,255,0.78); line-height:1.5;">
+            <div style="display:flex; justify-content:space-between;"><span>Vence ${dd(m.due)}</span><span>Fecha ${dd(m.close)}</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>Limite <span class="num">${formatBRL(m.limit)}</span></span><span>Disp. <span class="num">${formatBRL(avail)}</span></span></div></div></div>`;
+      }).join('');
+    }
+    const mlab = d => ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'][d.getMonth()] + '/' + String(d.getFullYear()).slice(2);
+    function parseInst(desc) {
+      const m = desc.match(/(?:\s*-\s*Parcela)?\s*(\d{1,2})\/(\d{1,2})\s*$/i); if (!m) return null;
+      const x = +m[1], y = +m[2]; if (y < 2 || y > 60 || x < 1 || x > y) return null;
+      return { x, y, base: desc.slice(0, m.index).trim() };
+    }
+    function parseCardMeta(text) {
+      const out = {}, num = v => parseFloat(v.replace(/\./g, '').replace(',', '.'));
+      let m = text.match(/Limite total (?:de cr[ée]dito|do cart[aã]o de cr[ée]dito)[:\s]*R\$\s*([\d.]+,\d{2})/i); if (m) out.limit = num(m[1]);
+      m = text.match(/(?:Data de vencimento|Vencimento)[:\s]*(\d{1,2})(?:\/\d{2}\/\d{4}|\s+[A-Za-z]{3}\s+\d{4})/); if (m) out.due = +m[1];
+      m = text.match(/[Ff]echamento[^\d\n]{0,40}(\d{1,2})(?:\/\d{2}\/\d{4}|\s+[A-Za-z]{3}\s+\d{4})/); if (m) out.close = +m[1];
+      return Object.keys(out).length ? out : null;
+    }
+    function openCard(id) {
+      const { m, bill, parc, avail } = cardNums(id);
+      const tx = state.transactions.filter(t => t.card === id);
+      const total = tx.reduce((a, t) => a + (t.type === 'income' ? -t.val : t.val), 0);
+      const inst = tx.map(t => ({ t, i: parseInst(t.desc) })).filter(o => o.i && o.t.type === 'expense');
+      const now = new Date(), proj = [];
+      for (let k = 1; k <= 12; k++) {
+        const v = inst.reduce((a, o) => a + (o.i.y - o.i.x >= k ? o.t.val : 0), 0);
+        if (!v) break;
+        proj.push({ lab: new Date(now.getFullYear(), now.getMonth() + k, 1).toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }), v });
+      }
+      const mx = Math.max(1, ...proj.map(p => p.v));
+      const kv = (a, b, c) => `<div><div class="micro-label">${a}</div><div class="num" style="font-size:15px; ${c ? 'color:' + c : ''}">${b}</div></div>`;
+      const sec = t => `<div class="micro-label" style="margin:14px 0 6px;">${t}</div>`;
+      document.getElementById('card-modal-body').innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="brand-title">${m.name}</div>
+          <div style="display:flex; gap:8px;"><button class="icon-circle-btn" onclick="editCard('${id}')">✎</button><button class="icon-circle-btn" onclick="closeModal('card-modal')">✕</button></div>
+        </div>
+        <div class="glass-card" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          ${kv('Fatura atual', formatBRL(bill))}${kv('Vencimento', dd(m.due))}${kv('Fechamento', dd(m.close))}${kv('Limite', formatBRL(m.limit))}
+          ${kv('Parcelas futuras', formatBRL(parc))}${kv('Limite disponível', formatBRL(avail), avail < 0 ? 'var(--rose-soft)' : 'var(--emerald-soft)')}
+        </div>
+        ${sec('Lançamentos do cartão (' + tx.length + ') · total ' + formatBRL(total))}
+        <div class="glass-card" style="display:flex; flex-direction:column; gap:6px;">${tx.map(t => { const p = parseInst(t.desc); return `<div style="display:flex; justify-content:space-between; gap:8px; font-size:12.5px;"><span style="min-width:0;"><span style="color:var(--text-secondary);">${t.date}</span> ${p ? p.base : t.desc}${p ? ` <span style="font-size:10.5px; color:var(--text-secondary);">${p.x}/${p.y}</span>` : ''}</span><span class="num" style="white-space:nowrap; color:${t.type === 'income' ? 'var(--emerald-soft)' : 'inherit'};">${t.type === 'income' ? '+' : ''}${formatBRL(t.val)}</span></div>`; }).join('') || '<div style="font-size:12px; color:var(--text-secondary);">Sem lançamentos. Importe a fatura em Importar PDF.</div>'}</div>
+        ${sec('Projeção das próximas faturas (só parcelas)')}
+        <div class="glass-card" style="display:flex; flex-direction:column; gap:7px;">${proj.map(p => `<div style="display:flex; align-items:center; gap:8px; font-size:12.5px;"><span style="width:46px; white-space:nowrap;">${p.lab}</span><div style="flex:1; height:6px; border-radius:6px; background:rgba(255,255,255,.08);"><div style="width:${p.v / mx * 100}%; height:100%; border-radius:6px; background:var(--emerald-soft);"></div></div><span class="num">${formatBRL(p.v)}</span></div>`).join('') || '<div style="font-size:12px; color:var(--text-secondary);">Sem parcelas ativas. Importe a fatura deste cartão.</div>'}</div>
+        ${sec('Compras parceladas ativas (' + inst.filter(o => o.i.x < o.i.y).length + ')')}
+        <div class="glass-card" style="display:flex; flex-direction:column; gap:8px;">${inst.filter(o => o.i.x < o.i.y).map(o => `<div style="display:flex; justify-content:space-between; font-size:12.5px; gap:8px;"><span style="min-width:0;">${o.i.base}<br><span style="font-size:11px; color:var(--text-secondary);">${o.i.x}/${o.i.y} · faltam ${o.i.y - o.i.x} · termina ${mlab(new Date(now.getFullYear(), now.getMonth() + (o.i.y - o.i.x), 1))}</span></span><span class="num">${formatBRL(o.t.val)}/mês</span></div>`).join('') || '<div style="font-size:12px; color:var(--text-secondary);">Nenhuma.</div>'}</div>
+`;
+      openModal('card-modal');
+    }
+    function editCard(id) {
+      const m = cardMeta(id), n = v => parseFloat(String(v).replace(',', '.')) || 0;
+      const lim = prompt('Limite total (R$):', m.limit); if (lim === null) return;
+      const cl = prompt('Dia do fechamento da fatura:', m.close || ''); if (cl === null) return;
+      const du = prompt('Dia do vencimento da fatura:', m.due || ''); if (du === null) return;
+      state.cardMeta = state.cardMeta || {}; state.cardMeta[id] = { limit: n(lim), close: parseInt(cl) || 0, due: parseInt(du) || 0 };
+      saveState(); renderAll(); openCard(id);
+    }
+    const _renderAllBase2 = renderAll;
+    renderAll = function () { _renderAllBase2(); renderCards(); };
 
     // ---------- Finanças: dívidas, rendas, plano e assistente IA ----------
     function addDebt() {
