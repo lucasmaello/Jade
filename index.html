@@ -640,6 +640,7 @@
       background: rgba(52, 211, 153, 0.04);
       cursor: pointer;
     }
+  .brand-logo{width:30px;height:30px;border-radius:9px;object-fit:cover;box-shadow:0 0 0 1px rgba(52,211,153,.35);flex:none}
   </style>
 </head>
 <body>
@@ -669,7 +670,7 @@
     <!-- Cabeçalho Superior Limpo -->
     <header class="top-header">
       <div>
-        <div class="brand-title"><span class="brand-dot"></span>JADE OS</div>
+        <div class="brand-title"><img class="brand-logo" alt="JADE OS" src="data:image/png;base64,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" />JADE OS</div>
         <div class="brand-sub" id="current-date-label">Sexta, 20 de Novembro</div>
       </div>
       <div class="header-actions">
@@ -1342,7 +1343,7 @@
       const loader = document.getElementById('import-loading'), previewArea = document.getElementById('import-preview-area');
       loader.style.display = 'block'; previewArea.style.display = 'none';
       document.getElementById('import-filename').textContent = files.length > 1 ? files.length + ' arquivos' : files[0].name;
-      const acc = [], seen = new Set(); window._declTotals = null; window._pendingMeta = null;
+      const acc = [], seen = new Set(); window._declTotals = null; window._pendingMeta = null; window._pendingFuture = null;
       try {
         for (const file of files) {
           extractedQueue = [];
@@ -1363,7 +1364,7 @@
         let text = '';
         try { text = await extractPdfText(file); } catch (e) { console.warn('Leitor local falhou:', e); }
         document.getElementById('import-raw-text').value = text;
-        if (text) { guessCard(file.name, text); window._pendingMeta = parseCardMeta(text); smartExtract(text, file.name); }
+        if (text) { detectAndSelectCard(text, file.name); window._pendingMeta = parseCardMeta(text); window._pendingFuture = declaredFuture(text); smartExtract(text, file.name); }
         const bad = !extractedQueue.length || qErr(extractedQueue, window._declTotals) > 0.02;
         if (bad && hasKey()) {
           const local = extractedQueue.slice();
@@ -1397,7 +1398,9 @@
       [new RegExp('Total (?:desta fatura|da fatura(?!\\s*anterior)|a pagar|dos lan[cç]amentos atuais|geral da fatura)[^\\d\\n-]{0,40}R?\\$?\\s*' + M, 'gi'),
        new RegExp('Valor (?:total )?da fatura[^\\d\\n]{0,40}R\\$\\s*' + M, 'gi'),
        new RegExp('no valor de\\s*R\\$\\s*' + M, 'gi'),
-       new RegExp('Total da fatura[^\\d\\n]{0,30}' + M, 'gi')].forEach(re => { let m; while ((m = re.exec(text))) out.add(num(m[1])); });
+       new RegExp('Total da fatura[^\\d\\n]{0,30}' + M, 'gi'),
+       new RegExp('Total a pagar\\s*R\\$\\s*' + M, 'gi'), new RegExp('Total da sua fatura\\s*R\\$\\s*' + M, 'gi'),
+       new RegExp('Total geral dos lan[cç]amentos\\s*' + M, 'gi'), new RegExp('\\bTotal\\s+R\\$\\s*' + M, 'gi')].forEach(re => { let m; while ((m = re.exec(text))) out.add(num(m[1])); });
       return [...out];
     }
 
@@ -1504,7 +1507,7 @@
 
     async function extractWithGeminiVision(file) {
       const inl = await fileToInline(file);
-      const prompt = `Você lê faturas de cartão, extratos e prints de aplicativos bancários brasileiros. Hoje é ${new Date().toLocaleDateString('pt-BR')}. Extraia TODOS os lançamentos individuais visíveis (compras, parcelas, tarifas, juros, IOF, estornos, créditos). NÃO inclua: pagamentos da fatura anterior, totais, subtotais, limites, saldos, resumos e a seção de parcelas de próximas faturas. Mantenha o texto da parcela na descrição (ex.: "Loja - Parcela 3/10"). Datas em DD/MM (para "Hoje" ou "Ontem" use a data real). Em val use número positivo para compras e saídas e NEGATIVO para estornos, créditos e entradas. Retorne APENAS JSON puro, sem markdown: [{"date":"DD/MM","desc":"ESTABELECIMENTO","val":123.45}]`;
+      const prompt = `Você lê faturas de cartão, extratos e prints de aplicativos bancários brasileiros. Hoje é ${new Date().toLocaleDateString('pt-BR')}. Extraia TODOS os lançamentos individuais visíveis (compras, parcelas, tarifas, juros, IOF, estornos, créditos). NÃO inclua: pagamentos da fatura anterior, totais, subtotais, limites, saldos, resumos e a seção de parcelas de próximas faturas. Mantenha o texto da parcela na descrição (ex.: "Loja - Parcela 3/10"). Datas em DD/MM (para "Hoje" ou "Ontem" use a data real). Em val use número positivo para compras e saídas e NEGATIVO para estornos, créditos, descontos, reembolsos, cashback e entradas (valores em verde costumam ser créditos). Ignore linhas de pagamento de fatura. Quando a data é título de grupo (ex.: 17 de novembro), vale para os itens abaixo. Parcelas: escreva Parcela 3/8 na descrição. Retorne APENAS JSON puro, sem markdown: [{"date":"DD/MM","desc":"ESTABELECIMENTO","val":123.45}]`;
       const { res, data } = await geminiCall({
         generationConfig: { responseMimeType: 'application/json' },
         contents: [{
@@ -1570,14 +1573,7 @@
       return out;
     }
 
-    function guessCard(name, text) {
-      const t = (name + ' ' + text.slice(0, 600)).toLowerCase();
-      const sel = document.getElementById('import-card');
-      if (!sel) return;
-      if (t.includes('nubank') || t.includes('nu pagamentos') || /\bnu\b/.test(t)) sel.value = 'nubank';
-      else if (t.includes('itaú') || t.includes('itau')) sel.value = 'itau';
-      else if (t.includes('bradesco')) sel.value = 'bradesco';
-    }
+    function guessCard(name, text) { detectAndSelectCard(text, name); }
 
     function parseBrazilianStatementText(text, filename = '', quiet = false) {
       const cut = text.search(/compras\s+parceladas\s*-?\s*pr[óo]ximas\s+faturas/i);
@@ -1631,15 +1627,16 @@
 
     function renderCardBills() {
       const b = state.cardBills; if (!b) return;
-      ['itau', 'nubank', 'bradesco'].forEach(k => {
+      cardIds().forEach(k => {
         const el = document.getElementById('card-' + k + '-val');
         if (el && b[k] != null) el.textContent = formatBRL(b[k]);
       });
     }
 
-    const isPaymentLine = d => /pagamento|pgto|fatura anterior|saldo (anterior|restante)|total da fatura/i.test(d) && !/estorno|cr[eé]dito de/i.test(d);
+    const isPaymentLine = d => /pagamento|pagto|pgto|fatura anterior|saldo (anterior|restante)|total da fatura/i.test(d) && !/estorno|cr[eé]dito de/i.test(d);
     function renderExtractedQueue() {
       extractedQueue = extractedQueue.filter(x => !isPaymentLine(x.desc));
+      extractedQueue.forEach(x => { if (x.val > 0 && /estorno|reembolso|cr[eé]dito de|devolu[cç]|cashback|desconto/i.test(x.desc)) x.val = -x.val; });
       const chk = document.getElementById('import-check');
       if (chk) {
         const sel = extractedQueue.filter(x => x.selected), sum = qSum(sel), tot = window._declTotals;
@@ -1677,31 +1674,25 @@
       renderExtractedQueue();
     }
 
-    // Parcelas restantes de uma fatura viram uma dívida automática por cartão (substituída a cada importação)
-    function syncInstallmentDebt(cardId, items) {
-      const ids = { nubank: 9001, itau: 9002, bradesco: 9003 }, names = { nubank: 'Nubank', itau: 'Itaú', bradesco: 'Bradesco' };
-      let remaining = 0, monthly = 0, n = 0;
-      items.forEach(it => {
-        const m = it.val > 0 && it.desc.match(/(\d{1,2})\/(\d{1,2})\s*$/);
-        if (!m) return;
-        const x = +m[1], y = +m[2];
-        if (y < 2 || y > 60 || x < 1 || x > y) return;
-        remaining += (y - x) * it.val;
-        if (x < y) { monthly += it.val; n++; }
-      });
+    // Parcelas restantes viram uma dívida automática por cartão (usa o total futuro da própria fatura quando existe)
+    function syncInstallmentDebt(cardId, items, declared) {
+      const m = cardMeta(cardId); let remaining = 0, monthly = 0, n = 0;
+      instGroups(items).forEach(g => { remaining += (g.y - g.x) * g.v; if (g.x < g.y) { monthly += g.v; n++; } });
+      if (declared > 0) remaining = declared;
       remaining = Math.round(remaining * 100) / 100;
-      state.debts = state.debts.filter(d => d.id !== ids[cardId]);
-      if (remaining > 0) state.debts.push({ id: ids[cardId], name: `Parcelado ${names[cardId] || cardId} (${n} compras)`, total: remaining, paid: 0, rate: 0, parcela: Math.round(monthly * 100) / 100, due: 0, auto: true });
+      state.debts = state.debts.filter(d => d.id !== m.debtId);
+      if (remaining > 0) state.debts.push({ id: m.debtId, name: `Parcelado ${m.name}${n ? ' (' + n + ' compras)' : ''}`, total: remaining, paid: 0, rate: 0, parcela: Math.round(monthly * 100) / 100, due: 0, auto: true });
       return { remaining };
     }
 
     function confirmExtractedImport() {
       const toImport = extractedQueue.filter(x => x.selected && !isPaymentLine(x.desc));
       if (toImport.length === 0) return;
-      const cardId = (document.getElementById('import-card') || {}).value || '';
+      let cardId = (document.getElementById('import-card') || {}).value || '';
+      if (cardId === '__new__') { cardId = window._pendingCard ? createCard(window._pendingCard) : ''; window._pendingCard = null; }
       if (cardId) {
         state.transactions = state.transactions.filter(t => t.card !== cardId);
-        if (window._pendingMeta) { state.cardMeta = state.cardMeta || {}; state.cardMeta[cardId] = Object.assign(state.cardMeta[cardId] || {}, window._pendingMeta); window._pendingMeta = null; }
+        if (window._pendingMeta) { Object.assign(cardMeta(cardId), window._pendingMeta); window._pendingMeta = null; }
       }
       if (cardId) {
         state.cardBills = state.cardBills || { itau: 4631.24, nubank: 2840, bradesco: 4190 };
@@ -1723,7 +1714,8 @@
           card: cardId
         });
       });
-      const inst = cardId ? syncInstallmentDebt(cardId, toImport) : null;
+      const inst = cardId ? syncInstallmentDebt(cardId, toImport, window._pendingFuture) : null;
+      window._pendingFuture = null;
       extractedQueue = [];
       document.getElementById('import-preview-area').style.display = 'none';
       saveState();
@@ -1916,7 +1908,7 @@
         <div class="check-row" style="cursor:default;">
           <div class="check-left" style="flex-direction:column; align-items:flex-start; gap:2px;">
             <span class="item-title">${tx.desc}</span>
-            <span style="font-size:10.5px; color:var(--text-secondary);">${tx.date}${tx.card ? ' · ' + cn[tx.card] : ''}</span>
+            <span style="font-size:10.5px; color:var(--text-secondary);">${tx.date}${tx.card ? ' · ' + cardName(tx.card) : ''}</span>
           </div>
           <span class="num" style="font-size:13px; color:${tx.type === 'income' ? 'var(--emerald-soft)' : 'var(--text-primary)'};">
             ${tx.type === 'income' ? '+' : '-'} ${formatBRL(tx.val)} <button class="icon-circle-btn" style="width:24px;height:24px;font-size:11px;" onclick="deleteTx(${tx.id})">✕</button>
@@ -2083,50 +2075,129 @@
       bradesco: { name: 'Bradesco Prime', limit: 28000, close: 10, due: 0 }
     };
     const CARD_DEBT = { nubank: 9001, itau: 9002, bradesco: 9003 };
-    const cardMeta = id => Object.assign({}, CARD_DEFAULTS[id], (state.cardMeta || {})[id]);
+    function ensureCards() {
+      if (state.cardsX) return;
+      state.cardsX = {};
+      Object.keys(CARD_DEFAULTS).forEach(id => {
+        state.cardsX[id] = Object.assign({ bank: { itau: 'Itaú', nubank: 'Nubank', bradesco: 'Bradesco' }[id], last4: { itau: '1488', bradesco: '8652' }[id] || '', debtId: CARD_DEBT[id] }, CARD_DEFAULTS[id], (state.cardMeta || {})[id]);
+      });
+    }
+    const cardIds = () => { ensureCards(); return Object.keys(state.cardsX); };
+    const cardMeta = id => { ensureCards(); return state.cardsX[id] || { name: id, limit: 0, close: 0, due: 0, debtId: 0 }; };
+    const cardName = id => cardMeta(id).name;
+    function createCard(det) {
+      ensureCards();
+      let id = det.id, k = 2; while (state.cardsX[id]) id = det.id + (k++);
+      state.cardsX[id] = { name: det.name, bank: det.bank, last4: det.last4 || '', limit: det.limit || 0, close: det.close || 0, due: det.due || 0, debtId: 9100 + Object.keys(state.cardsX).length };
+      return id;
+    }
+    const slug = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+    function addCardManual() {
+      const name = prompt('Nome do cartão (ex.: Inter Black):'); if (!name) return;
+      const n = v => parseFloat(String(v).replace(',', '.')) || 0;
+      const lim = prompt('Limite total (R$):', '0'), cl = prompt('Dia do fechamento:', '0'), du = prompt('Dia do vencimento:', '0');
+      createCard({ id: slug(name), bank: name, name, limit: n(lim), close: parseInt(cl) || 0, due: parseInt(du) || 0 });
+      saveState(); renderAll();
+    }
+    function delCard(id) {
+      if (!confirm('Excluir este cartão e os lançamentos dele?')) return;
+      const m = cardMeta(id);
+      state.debts = state.debts.filter(d => d.id !== m.debtId);
+      state.transactions = state.transactions.filter(t => t.card !== id);
+      if (state.cardBills) delete state.cardBills[id];
+      delete state.cardsX[id]; saveState(); closeModal('card-modal'); renderAll();
+    }
+    const BANKS = [['Nubank', /nubank|nu pagamentos/i], ['Mercado Pago', /mercado\s*pago/i], ['PicPay', /picpay/i], ['Bradesco', /bradesco/i], ['Itaú', /ita[uú]/i], ['Inter', /banco inter/i], ['C6 Bank', /c6 bank/i], ['Santander', /santander/i], ['Banco do Brasil', /banco do brasil/i], ['Caixa', /caixa econ/i], ['BTG', /btg pactual/i]];
+    function detectCard(text, name) {
+      const head = name + ' ' + text.slice(0, 3000), b = BANKS.find(([, re]) => re.test(head));
+      if (!b) return null;
+      let last4 = ((text.match(/Cart[aã]o\s+\d{4}[.\s]X{4}[.\s]X{4}[.\s](\d{4})/i) || text.match(/N[úu]mero do Cart[aã]o\s+\d{4}\s+X{4}\s+X{4}\s+(\d{4})/i)) || [])[1] || '';
+      if (!['Itaú', 'Bradesco'].includes(b[0])) last4 = '';
+      const tier = ((head.match(/\b(Infinite|Gold|Platinum|Black|Nanquim|Prime)\b/i) || [])[1] || '').toLowerCase();
+      const T = tier ? ' ' + tier[0].toUpperCase() + tier.slice(1) : '';
+      return { bank: b[0], last4, name: b[0] + (b[0] === 'Mercado Pago' ? '' : T) + (last4 ? ' ·' + last4 : ''), id: slug(b[0]) + last4 };
+    }
+    function fillCardSelects(sel) {
+      const ic = document.getElementById('import-card');
+      if (ic) {
+        const cur = sel !== undefined ? sel : ic.value;
+        ic.innerHTML = cardIds().map(i => `<option value="${i}">Fatura: ${cardMeta(i).name}</option>`).join('') + (window._pendingCard ? `<option value="__new__">✚ Novo cartão: ${window._pendingCard.name}</option>` : '') + '<option value="">Só extrato (sem cartão)</option>';
+        ic.value = [...ic.options].some(o => o.value === cur) ? cur : (cardIds()[0] || '');
+      }
+      const tc = document.getElementById('tx-card');
+      if (tc) { const c = tc.value; tc.innerHTML = '<option value="">Conta corrente / dinheiro</option>' + cardIds().map(i => `<option value="${i}">Cartão ${cardMeta(i).name}</option>`).join(''); tc.value = [...tc.options].some(o => o.value === c) ? c : ''; }
+    }
+    function detectAndSelectCard(text, name) {
+      const det = detectCard(text, name); window._pendingCard = null;
+      if (!det) { fillCardSelects(); return; }
+      const id = cardIds().find(i => { const c = cardMeta(i); return c.bank === det.bank && (!det.last4 || !c.last4 || c.last4 === det.last4); });
+      if (id) fillCardSelects(id); else { window._pendingCard = det; fillCardSelects('__new__'); }
+    }
     const getBills = () => Object.assign({ itau: 4631.24, nubank: 2840, bradesco: 4190 }, state.cardBills || {});
     function cardNums(id) {
       const m = cardMeta(id), bill = getBills()[id] || 0;
-      const d = state.debts.find(x => x.id === CARD_DEBT[id]), parc = d ? d.total - d.paid : 0;
+      const d = state.debts.find(x => x.id === cardMeta(id).debtId), parc = d ? d.total - d.paid : 0;
       return { m, bill, parc, used: bill + parc, avail: m.limit - bill - parc };
     }
     const dd = n => n ? 'dia ' + String(n).padStart(2, '0') : '—';
     function renderCards() {
       const el = document.getElementById('cards-carousel'); if (!el) return;
-      el.innerHTML = ['itau', 'nubank', 'bradesco'].map(id => {
-        const { m, bill, avail } = cardNums(id);
-        return `<div class="bank-card ${id}" onclick="openCard('${id}')" style="cursor:pointer;">
+      const std = ['itau', 'nubank', 'bradesco'];
+      el.innerHTML = cardIds().map(id => {
+        const { m, bill, avail } = cardNums(id), has = m.limit > 0;
+        return `<div class="bank-card ${std.includes(id) ? id : ''}" onclick="openCard('${id}')" style="cursor:pointer;${std.includes(id) ? '' : 'background:linear-gradient(135deg,#14532d,#0b2b1f);'}">
           <div class="card-top-row"><span class="card-brand-name">${m.name}</span><div class="card-chip"></div></div>
           <div><div class="micro-label" style="color:rgba(255,255,255,0.68);">Fatura atual</div>
           <div class="num" style="font-size:22px; font-weight:500; margin-top:2px;" id="card-${id}-val">${formatBRL(bill)}</div></div>
           <div style="font-size:10.5px; color:rgba(255,255,255,0.78); line-height:1.5;">
             <div style="display:flex; justify-content:space-between;"><span>Vence ${dd(m.due)}</span><span>Fecha ${dd(m.close)}</span></div>
-            <div style="display:flex; justify-content:space-between;"><span>Limite <span class="num">${formatBRL(m.limit)}</span></span><span>Disp. <span class="num">${formatBRL(avail)}</span></span></div></div></div>`;
-      }).join('');
+            <div style="display:flex; justify-content:space-between;"><span>Limite <span class="num">${has ? formatBRL(m.limit) : '—'}</span></span><span>Disp. <span class="num">${has ? formatBRL(avail) : '—'}</span></span></div></div></div>`;
+      }).join('') + `<div class="bank-card" onclick="addCardManual()" style="cursor:pointer; display:grid; place-items:center; opacity:.75; font-size:14px;">+ Novo cartão</div>`;
     }
     const mlab = d => ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'][d.getMonth()] + '/' + String(d.getFullYear()).slice(2);
     function parseInst(desc) {
-      const m = desc.match(/(?:\s*-\s*Parcela)?\s*(\d{1,2})\/(\d{1,2})\s*$/i); if (!m) return null;
+      const m = desc.match(/(?:Parcela\s+)?(?<!\d)(\d{1,2})(?:\s*\/\s*|\s+de\s+)(\d{1,2})(?!\d)/i); if (!m) return null;
       const x = +m[1], y = +m[2]; if (y < 2 || y > 60 || x < 1 || x > y) return null;
-      return { x, y, base: desc.slice(0, m.index).trim() };
+      const base = (desc.slice(0, m.index) + ' ' + desc.slice(m.index + m[0].length)).replace(/\s+/g, ' ').replace(/\s*-\s*$/, '').replace(/PARC$/i, '').trim();
+      return { x, y, base };
+    }
+    // Agrupa parcelas da mesma compra (se várias parcelas vieram na mesma fatura, vale a maior)
+    function instGroups(items) {
+      const g = {};
+      items.forEach(it => {
+        if (it.val <= 0 || /anuidade|seguro|tarifa/i.test(it.desc)) return;
+        const p = parseInst(it.desc); if (!p) return;
+        const k = p.base + '|' + it.val.toFixed(2) + '|' + p.y;
+        if (!g[k] || p.x > g[k].x) g[k] = { base: p.base, x: p.x, y: p.y, v: it.val };
+      });
+      return Object.values(g);
+    }
+    function declaredFuture(text) {
+      const M = '(\\d{1,3}(?:\\.\\d{3})*,\\d{2})', num = v => Math.round(parseFloat(v.replace(/\./g, '').replace(',', '.')) * 100) / 100;
+      for (const re of [new RegExp('Total para (?:as )?pr[óo]ximas faturas[^\\d]{0,30}' + M, 'i'), new RegExp('Compras parceladas\\s*R\\$\\s*' + M, 'i'), new RegExp('Valor consolidado das parcelas futuras\\s*R\\$\\s*' + M, 'i'), new RegExp('Saldo em aberto total\\s*R\\$\\s*' + M, 'i')]) { const m = text.match(re); if (m) return num(m[1]); }
+      return null;
     }
     function parseCardMeta(text) {
       const out = {}, num = v => parseFloat(v.replace(/\./g, '').replace(',', '.'));
-      let m = text.match(/Limite total (?:de cr[ée]dito|do cart[aã]o de cr[ée]dito)[:\s]*R\$\s*([\d.]+,\d{2})/i); if (m) out.limit = num(m[1]);
-      m = text.match(/(?:Data de vencimento|Vencimento)[:\s]*(\d{1,2})(?:\/\d{2}\/\d{4}|\s+[A-Za-z]{3}\s+\d{4})/); if (m) out.due = +m[1];
-      m = text.match(/[Ff]echamento[^\d\n]{0,40}(\d{1,2})(?:\/\d{2}\/\d{4}|\s+[A-Za-z]{3}\s+\d{4})/); if (m) out.close = +m[1];
+      let m = text.match(/Limite (?:total(?: de cr[ée]dito| do cart[aã]o de cr[ée]dito)?|de compras)[:\s]*R\$\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i); if (m) out.limit = num(m[1]);
+      const day = label => { const re = new RegExp(label + '[^\\d]{0,40}(\\d{1,2})(?=\\/\\d{2}\\/\\d{2,4}|\\s+[A-Za-z]{3}\\s+\\d{4}|\\s+de\\s+[A-Za-zç]+)', 'gi'); const x = re.exec(text); return x ? +x[1] : 0; };
+      const due = day('(?:Data de vencimento|Vencimento|Vence em)'), close = day('[Ff]echamento');
+      const rev = text.match(/(\d{1,2})\/\d{2}\/\d{4}\s*\|\s*(\d{1,2})\/\d{2}\/\d{4}\s+Vencimento:\s*Fechamento:/) || [];
+      const rev2 = text.match(/(\d{1,2})\s+de\s+[A-Za-zç]+\s+Fechamento da fatura/i) || [];
+      if (due || rev[1]) out.due = due || +rev[1];
+      if (close || rev[2] || rev2[1]) out.close = close || +(rev[2] || rev2[1]);
       return Object.keys(out).length ? out : null;
     }
     function openCard(id) {
       const { m, bill, parc, avail } = cardNums(id);
       const tx = state.transactions.filter(t => t.card === id);
       const total = tx.reduce((a, t) => a + (t.type === 'income' ? -t.val : t.val), 0);
-      const inst = tx.map(t => ({ t, i: parseInst(t.desc) })).filter(o => o.i && o.t.type === 'expense');
+      const inst = instGroups(tx.filter(t => t.type === 'expense')).map(g => ({ t: { val: g.v }, i: { x: g.x, y: g.y, base: g.base } }));
       const now = new Date(), proj = [];
       for (let k = 1; k <= 12; k++) {
         const v = inst.reduce((a, o) => a + (o.i.y - o.i.x >= k ? o.t.val : 0), 0);
         if (!v) break;
-        proj.push({ lab: new Date(now.getFullYear(), now.getMonth() + k, 1).toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }), v });
+        proj.push({ lab: mlab(new Date(now.getFullYear(), now.getMonth() + k, 1)), v });
       }
       const mx = Math.max(1, ...proj.map(p => p.v));
       const kv = (a, b, c) => `<div><div class="micro-label">${a}</div><div class="num" style="font-size:15px; ${c ? 'color:' + c : ''}">${b}</div></div>`;
@@ -2134,7 +2205,7 @@
       document.getElementById('card-modal-body').innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div class="brand-title">${m.name}</div>
-          <div style="display:flex; gap:8px;"><button class="icon-circle-btn" onclick="editCard('${id}')">✎</button><button class="icon-circle-btn" onclick="closeModal('card-modal')">✕</button></div>
+          <div style="display:flex; gap:8px;"><button class="icon-circle-btn" onclick="delCard('${id}')">🗑</button><button class="icon-circle-btn" onclick="editCard('${id}')">✎</button><button class="icon-circle-btn" onclick="closeModal('card-modal')">✕</button></div>
         </div>
         <div class="glass-card" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
           ${kv('Fatura atual', formatBRL(bill))}${kv('Vencimento', dd(m.due))}${kv('Fechamento', dd(m.close))}${kv('Limite', formatBRL(m.limit))}
@@ -2151,14 +2222,15 @@
     }
     function editCard(id) {
       const m = cardMeta(id), n = v => parseFloat(String(v).replace(',', '.')) || 0;
+      const nm = prompt('Nome do cartão:', m.name); if (nm === null) return;
       const lim = prompt('Limite total (R$):', m.limit); if (lim === null) return;
       const cl = prompt('Dia do fechamento da fatura:', m.close || ''); if (cl === null) return;
       const du = prompt('Dia do vencimento da fatura:', m.due || ''); if (du === null) return;
-      state.cardMeta = state.cardMeta || {}; state.cardMeta[id] = { limit: n(lim), close: parseInt(cl) || 0, due: parseInt(du) || 0 };
+      Object.assign(m, { name: nm.trim() || m.name, limit: n(lim), close: parseInt(cl) || 0, due: parseInt(du) || 0 });
       saveState(); renderAll(); openCard(id);
     }
     const _renderAllBase2 = renderAll;
-    renderAll = function () { _renderAllBase2(); renderCards(); };
+    renderAll = function () { _renderAllBase2(); renderCards(); fillCardSelects(); };
 
     // ---------- Finanças: dívidas, rendas, plano e assistente IA ----------
     function addDebt() {
