@@ -841,7 +841,18 @@
             <input type="number" id="nd-parc" class="jade-input num" placeholder="Parcela R$/mês" />
             <input type="number" id="nd-due" class="jade-input num" placeholder="Dia venc." />
           </div>
+          <div style="display:flex; gap:8px;">
+            <input type="number" id="nd-rem" class="jade-input num" placeholder="Parcelas restantes" />
+            <input type="number" id="nd-n" class="jade-input num" placeholder="Total de parcelas" />
+          </div>
           <button class="btn-jade" onclick="addDebt()">Adicionar dívida</button>
+        </div>
+
+        <div class="glass-card" style="display:flex; flex-direction:column; gap:8px;">
+          <div class="micro-label">Importar empréstimo / consignado</div>
+          <div style="font-size:12px; color:var(--text-secondary);">Contrato em PDF, print do app ou lista .json. Prints usam o Gemini.</div>
+          <label class="btn-ghost" style="text-align:center; cursor:pointer;">Selecionar arquivos<input type="file" accept=".pdf,.json,image/*" multiple style="display:none;" onchange="handleLoanUpload(event)" /></label>
+          <div id="loan-queue"></div>
         </div>
 
         <div class="glass-card" style="display:flex; flex-direction:column; gap:8px;">
@@ -1934,7 +1945,7 @@
               <span class="num" style="font-size:11.5px; color:var(--text-secondary);">${pct}% quitado</span>
             </div>
             <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
-            ${d.parcela ? `<div class="num" style="font-size:11.5px; color:var(--text-secondary); margin-top:6px;">Parcela ${formatBRL(d.parcela)}${d.due ? ' · vence dia ' + d.due : ''}</div>` : ''}
+            ${d.parcela ? `<div class="num" style="font-size:11.5px; color:var(--text-secondary); margin-top:6px;">Parcela ${formatBRL(d.parcela)}${d.due ? ' · vence dia ' + d.due : ''}${d.rem ? ' · faltam ' + d.rem + (d.n ? '/' + d.n : '') : ''}${d.end && dmy(d.end) ? ' · termina ' + mlab(dmy(d.end)) : ''}${d.est ? ' · <span style="color:#fbbf24;">saldo estimado</span>' : ''}</div>` : ''}
             <button class="btn-jade" style="margin-top:10px; padding:9px;" onclick="amortizeDebt(${d.id})">+ Amortizar R$ 300</button>
             <div style="display:flex; gap:8px; margin-top:8px;">
               <button class="btn-ghost" style="flex:1;" onclick="editDebt(${d.id})">Editar</button>
@@ -2233,22 +2244,97 @@
     renderAll = function () { _renderAllBase2(); renderCards(); fillCardSelects(); };
 
     // ---------- Finanças: dívidas, rendas, plano e assistente IA ----------
+    // ---------- Empréstimos e consignados ----------
+    const pvf = (p, i, n) => i ? p * (1 - Math.pow(1 + i, -n)) / i : p * n;
+    const dmy = t => { const m = String(t || '').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/); return m ? new Date(+m[3], +m[2] - 1, +m[1]) : null; };
+    function finishLoan(l) {
+      const now = new Date(); now.setHours(0, 0, 0, 0);
+      const first = dmy(l.first), end = dmy(l.end);
+      l.parcela = l.parcela || 0; l.rate = l.rate || 0;
+      if (!l.rem && l.n) {
+        if (first) { let paid = 0; for (let k = 0; k < l.n; k++) if (new Date(first.getFullYear(), first.getMonth() + k, first.getDate()) <= now) paid++; l.rem = l.n - paid; }
+        else if (end) { const m = (end.getFullYear() - now.getFullYear()) * 12 + end.getMonth() - now.getMonth() - (end.getDate() < now.getDate() ? 1 : 0); l.rem = Math.max(1, Math.min(l.n, m)); l.est = true; }
+        else l.rem = l.n;
+      }
+      if (!l.due) { const d = first || end; l.due = d ? d.getDate() : 0; }
+      if (!(l.saldo > 0)) { const i = l.rate / 100, full = pvf(l.parcela, i, l.n), part = pvf(l.parcela, i, l.rem); l.saldo = (l.orig && full > 0) ? l.orig * part / full : part; l.est = true; }
+      l.saldo = Math.round(l.saldo * 100) / 100;
+      l.name = l.name || `${l.bank || ''} · ${l.kind === 'consignado' ? 'Consignado' : 'Empréstimo'} ${formatBRL(l.orig || l.saldo)}`;
+      l.key = l.key || (l.contract ? 'ct:' + l.contract : [slug(l.bank || 'x'), l.kind || 'emp', (l.orig || 0).toFixed(2)].join('|'));
+      return l;
+    }
+    function parseLoanText(t) {
+      const nm = v => parseFloat(String(v).replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+      const af = re => { const m = t.match(new RegExp(re + '\\s*\\n\\s*([^\\n]+)', 'i')); return m ? m[1].trim() : ''; };
+      const bank = (BANKS.find(([, re]) => re.test(t.slice(0, 3000))) || [''])[0];
+      if (/Evolu[cç][aã]o de D[ií]vida/i.test(t)) {
+        const nxt = (t.match(/(\d{2}\/\d{2}\/\d{4})\s+R\$ [\d.,]+ R\$ [\d.,]+ R\$ [\d.,]+ R\$ [\d.,]+ PARCELA A VENCER/) || [])[1];
+        const par = (t.match(/\n\d{1,2}\s+\d{2}\/\d{2}\/\d{4}\s+R\$\s*([\d.]+,\d{2})/) || [])[1];
+        return [finishLoan({ bank, kind: 'emprestimo', name: [bank, af('Modalidade de Opera[cç][aã]o')].filter(Boolean).join(' · '), orig: nm(af('Valor da Opera[cç][aã]o')), n: parseInt(af('Prazo Total da Opera[cç][aã]o')) || 0, rem: parseInt(af('Prazo Remanescente')) || 0, saldo: nm(af('Saldo Devedor Atualizado')), rate: nm(af('Taxa de Juros Mensal Nominal')), parcela: nm(par), end: af('Data do [ÚU]ltimo Vencimento'), due: nxt ? +nxt.slice(0, 2) : 0, contract: af('N[úu]mero do Contrato') })];
+      }
+      if (/C[eé]dula de Cr[eé]dito Banc[aá]rio/i.test(t)) {
+        return [finishLoan({ bank, kind: 'emprestimo', name: bank + ' · Empréstimo Pessoal', orig: nm(af('1 - Valor Liberado/Solicitado')), n: parseInt(af('7 - Quantidade de Parcela\\(s\\)')) || 0, parcela: nm(af('8 - Valor da\\(s\\) Parcela\\(s\\) - R\\$')), rate: nm(af('3\\.1 - Taxa de Juros Efetiva')), first: af('13 - Vencimento da Primeira Parcela'), end: af('14 - Vencimento da [ÚU]ltima Parcela'), contract: (t.match(/N[ºo] Documento\s*\n\s*(\d{8,})/) || [])[1] || '' })];
+      }
+      return [];
+    }
+    async function loanViaGemini(file) {
+      const inl = await fileToInline(file);
+      const { res, data } = await geminiCall({ generationConfig: { responseMimeType: 'application/json' }, contents: [{ parts: [{ text: 'Extraia TODOS os empréstimos, consignados e financiamentos deste documento ou print. Retorne APENAS JSON puro: [{"bank":"Banco","kind":"consignado ou emprestimo ou financiamento","orig":valor contratado,"parcela":valor da parcela,"n":numero de parcelas,"rem":parcelas restantes ou null,"rate":juros ao mes em % ou null,"end":"DD/MM/AAAA ou null","saldo":saldo devedor atual ou null}]. Numeros sem R$ e sem separador de milhar.' }, { inline_data: { mime_type: inl.mime, data: inl.data } }] }] });
+      if (!res.ok) throw new Error(data.error?.message || ('Erro ' + res.status));
+      const arr = JSON.parse((data.candidates?.[0]?.content?.parts?.[0]?.text || '[]').replace(/```json|```/g, '').trim());
+      return arr.filter(x => x.parcela > 0 && x.n > 0).map(x => finishLoan({ ...x, saldo: x.saldo || 0, rem: x.rem || 0 }));
+    }
+    let loanQueue = [];
+    async function handleLoanUpload(event) {
+      const files = Array.from(event.target.files || []); if (!files.length) return;
+      showToast('Lendo ' + files.length + ' arquivo(s)...');
+      for (const f of files) {
+        try {
+          let items = [];
+          if (/\.json$/i.test(f.name)) { const j = JSON.parse(await f.text()); items = (j.loans || j).map(x => finishLoan({ ...x })); }
+          else {
+            if (f.type === 'application/pdf' || /\.pdf$/i.test(f.name)) { try { items = parseLoanText(await extractPdfText(f)); } catch (e) { console.warn(e); } }
+            if (!items.length) { if (!hasKey()) throw new Error('não reconheci o arquivo; para prints salve a chave Gemini'); items = await loanViaGemini(f); }
+          }
+          items.forEach(x => loanQueue.push({ ...x, sel: true }));
+        } catch (err) { showToast(f.name + ': ' + err.message); }
+      }
+      event.target.value = ''; renderLoanQueue();
+    }
+    function renderLoanQueue() {
+      const el = document.getElementById('loan-queue'); if (!el) return;
+      el.innerHTML = loanQueue.map((l, i) => `<label style="display:flex; gap:8px; align-items:flex-start; font-size:12.5px; padding:6px 0;"><input type="checkbox" ${l.sel ? 'checked' : ''} onchange="loanQueue[${i}].sel=this.checked" style="width:auto; margin-top:3px;"><span><b>${l.name}</b><br><span style="color:var(--text-secondary);">Parcela ${formatBRL(l.parcela)} · faltam ${l.rem}/${l.n} · juros ${l.rate}% a.m.<br>Saldo ${l.est ? '≈ ' : ''}${formatBRL(l.saldo)}${l.est ? ' (estimado, confira)' : ''}</span></span></label>`).join('') + (loanQueue.length ? '<button class="btn-jade" onclick="addLoans()">Adicionar às dívidas</button>' : '');
+    }
+    function addLoans() {
+      const sel = loanQueue.filter(l => l.sel); if (!sel.length) return showToast('Selecione ao menos um');
+      sel.forEach((l, i) => {
+        const d = { id: Date.now() + i, name: l.name, total: l.saldo, paid: 0, rate: l.rate || 0, parcela: l.parcela || 0, due: l.due || 0, n: l.n, rem: l.rem, end: l.end || '', est: !!l.est, orig: l.orig, kind: l.kind, key: l.key };
+        const k = state.debts.findIndex(x => x.key === l.key);
+        if (k >= 0) { d.id = state.debts[k].id; state.debts[k] = d; } else state.debts.push(d);
+      });
+      showToast(sel.length + ' empréstimo(s) adicionado(s)'); loanQueue = []; saveState(); renderAll(); renderLoanQueue();
+    }
     function addDebt() {
-      const g = id => document.getElementById(id).value;
-      const name = g('nd-name').trim(), total = parseFloat(g('nd-total'));
-      if (!name || !(total > 0)) return showToast('Informe nome e saldo');
-      state.debts.push({ id: Date.now(), name, total, paid: 0, rate: parseFloat(g('nd-rate')) || 0, parcela: parseFloat(g('nd-parc')) || 0, due: parseInt(g('nd-due')) || 0 });
-      ['nd-name', 'nd-total', 'nd-rate', 'nd-parc', 'nd-due'].forEach(i => document.getElementById(i).value = '');
+      const g = id => parseFloat(document.getElementById(id).value) || 0, name = document.getElementById('nd-name').value.trim();
+      const rate = g('nd-rate'), parcela = g('nd-parc'), rem = g('nd-rem'), nTot = g('nd-n');
+      let total = g('nd-total');
+      if (!total && parcela && rem) total = Math.round(pvf(parcela, rate / 100, rem) * 100) / 100;
+      if (!name || !(total > 0)) return showToast('Informe nome e saldo (ou parcela e parcelas restantes)');
+      state.debts.push({ id: Date.now(), name, total, paid: 0, rate, parcela, due: g('nd-due'), n: nTot || rem || 0, rem, est: !g('nd-total') && !!rem });
+      ['nd-name', 'nd-total', 'nd-rate', 'nd-parc', 'nd-due', 'nd-rem', 'nd-n'].forEach(i => document.getElementById(i).value = '');
       saveState(); renderAll(); showToast('Dívida adicionada');
     }
     function editDebt(id) {
       const d = state.debts.find(x => x.id === id); if (!d) return;
-      const rem = prompt('Saldo restante (R$):', (d.total - d.paid).toFixed(2)); if (rem === null) return;
+      const n = v => parseFloat(String(v).replace(',', '.')) || 0, cur = d.total - d.paid;
+      const sal = prompt('Saldo restante (R$):', cur.toFixed(2)); if (sal === null) return;
       const rate = prompt('Juros % ao mês:', d.rate); if (rate === null) return;
       const parc = prompt('Parcela mensal (R$, 0 se não houver):', d.parcela || 0); if (parc === null) return;
+      const left = prompt('Parcelas restantes (0 se não souber):', d.rem || 0); if (left === null) return;
       const due = prompt('Dia do vencimento (0 se não houver):', d.due || 0); if (due === null) return;
-      const n = v => parseFloat(String(v).replace(',', '.')) || 0;
-      d.total = d.paid + n(rem); d.rate = n(rate); d.parcela = n(parc); d.due = parseInt(due) || 0;
+      let saldo = n(sal);
+      if (n(left) && n(left) !== (d.rem || 0) && Math.abs(saldo - cur) < 0.01 && n(parc)) saldo = Math.round(pvf(n(parc), n(rate) / 100, n(left)) * 100) / 100;
+      Object.assign(d, { total: d.paid + saldo, rate: n(rate), parcela: n(parc), rem: n(left), n: Math.max(d.n || 0, n(left)), due: parseInt(due) || 0, est: false });
       saveState(); renderAll();
     }
     function delDebt(id) {
